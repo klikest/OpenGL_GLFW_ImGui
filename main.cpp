@@ -82,7 +82,7 @@ void display(GLFWwindow* window, double currentTime) {
 	ImGui::PlotLines("Framerate", samples, 100);
 
 	ImGui::End();
-
+	//
 	glUseProgram(renderingProgram);
 	GLuint offsetLoc = glGetUniformLocation(renderingProgram, "offset"); // get ptr to "offset"
 	glProgramUniform1f(renderingProgram, offsetLoc, x); // send value in "x" to "offset"
