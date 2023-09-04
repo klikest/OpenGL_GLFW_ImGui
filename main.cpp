@@ -8,6 +8,8 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include "UI.h"
+#include "FrameBuffer.h"
 
 
 using namespace std;
@@ -29,8 +31,6 @@ string readShaderSource(const char* filePath) {
 
 
 
-
-bool show_demo_window = true;
 #define numVAOs 1
 GLuint renderingProgram;
 GLuint vao[numVAOs];
@@ -61,48 +61,22 @@ void init(GLFWwindow* window) {
 	glBindVertexArray(vao[0]);
 }
 
-float x = 0.0f; // location of triangle on x axis
-float inc = 0.01f; // offset for moving the triangle
-
 
 void display(GLFWwindow* window, double currentTime) {
 	glfwPollEvents();
 	glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplGlfw_NewFrame();
-	ImGui::NewFrame();
-	ImGui::Begin("My First Tool");
-	ImGui::SliderFloat("offset", &x, -1.0f, 1.0f);
-
-	float samples[100];
-	for (int n = 0; n < 100; n++)
-		samples[n] = sinf(n * 0.2f + ImGui::GetTime() * 1.5f);
-	ImGui::PlotLines("Framerate", samples, 100);
-
-	ImGui::End();
-	//
+	
 	glUseProgram(renderingProgram);
 	GLuint offsetLoc = glGetUniformLocation(renderingProgram, "offset"); // get ptr to "offset"
-	glProgramUniform1f(renderingProgram, offsetLoc, x); // send value in "x" to "offset"
+	glProgramUniform1f(renderingProgram, offsetLoc, 0); // send value in "x" to "offset"
 	glDrawArrays(GL_TRIANGLES, 0, 3);
-
-	if (show_demo_window)
-		//ImGui::ShowDemoWindow(&show_demo_window);
-
-	ImGui::Render();
-	int display_w, display_h;
-	glfwGetFramebufferSize(window, &display_w, &display_h);
-	glViewport(0, 0, display_w, display_h);
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());;
-
-
-
+	//RenderUI(window);
 }
 
 int main(void) {
-	if (!glfwInit()) { exit(EXIT_FAILURE); }
+	if (!glfwInit()) {  }
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	
@@ -111,46 +85,69 @@ int main(void) {
 		return 1;
 
 	glfwMakeContextCurrent(window);
-	if (glewInit() != GLEW_OK) { exit(EXIT_FAILURE); }
+	if (glewInit() != GLEW_OK) {  }
 	glfwSwapInterval(1);
 	
 	init(window);
-
-	// Initialize ImGUI
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO(); (void)io;
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     
-	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;        
-	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-	ImGui::StyleColorsDark();
-
-	// When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
-	ImGuiStyle& style = ImGui::GetStyle();
-	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-	{
-		style.WindowRounding = 0.0f;
-		style.Colors[ImGuiCol_WindowBg].w = 1.0f;
-	}
-
-	ImGui_ImplGlfw_InitForOpenGL(window, true);
-	ImGui_ImplOpenGL3_Init("#version 430");
+	InitUI(window);
 
 
+	float width = 600;
+	float height = 300;
 
+	FrameBuffer sceneBuffer(width, height);
+	
 
 	while (!glfwWindowShouldClose(window)) {
-
-		display(window, glfwGetTime());
-		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-		{
-			GLFWwindow* backup_current_context = glfwGetCurrentContext();
-			ImGui::UpdatePlatformWindows();
-			ImGui::RenderPlatformWindowsDefault();
-			glfwMakeContextCurrent(backup_current_context);
-		}
-		glfwSwapBuffers(window);
+		
 		glfwPollEvents();
+
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
+		
+		ImGui::NewFrame();
+		ImGui::Begin("Scene");
+		{
+			ImGui::BeginChild("GameRender");
+
+			const float window_width = ImGui::GetContentRegionAvail().x;
+			const float window_height = ImGui::GetContentRegionAvail().y;
+
+			sceneBuffer.RescaleFrameBuffer(window_width, window_height);
+
+			ImVec2 pos = ImGui::GetCursorScreenPos();
+
+			ImGui::GetWindowDrawList()->AddImage(
+				(void*)sceneBuffer.getFrameTexture(),
+				ImVec2(pos.x, pos.y),
+				ImVec2(pos.x + window_width, pos.y + window_height),
+				ImVec2(0, 1),
+				ImVec2(1, 0)
+			);
+		}
+		ImGui::EndChild();
+		ImGui::End();
+		ImGui::Render();
+
+		sceneBuffer.Bind();
+
+		glUseProgram(renderingProgram);
+		glDrawArrays(GL_TRIANGLES, 0, 3);
+
+		sceneBuffer.Unbind();
+
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+		GLFWwindow* backup_current_context = glfwGetCurrentContext();
+		ImGui::UpdatePlatformWindows();
+		ImGui::RenderPlatformWindowsDefault();
+		glfwMakeContextCurrent(backup_current_context);
+
+		glfwSwapBuffers(window);
+
 	}
 	
 	glfwDestroyWindow(window);
@@ -162,7 +159,6 @@ int main(void) {
 	ImGui::DestroyContext();
 
 	glfwTerminate();
-	exit(EXIT_SUCCESS);
 
 
 }
