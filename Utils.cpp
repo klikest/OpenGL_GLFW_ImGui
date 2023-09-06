@@ -56,13 +56,13 @@ bool checkOpenGLError() {
 	return foundError;
 }
 
-GLuint createShaderProgram() {
+GLuint createShaderProgram(char* vert, char* frag) {
 	GLint vertCompiled;
 	GLint fragCompiled;
 	GLint linked;
 
-	string vertShaderStr = readShaderSource("vert_shader.glsl");
-	string fragShaderStr = readShaderSource("frag_shader.glsl");
+	string vertShaderStr = readShaderSource(vert);
+	string fragShaderStr = readShaderSource(frag);
 	const char* vertShaderSrc = vertShaderStr.c_str();
 	const char* fragShaderSrc = fragShaderStr.c_str();
 

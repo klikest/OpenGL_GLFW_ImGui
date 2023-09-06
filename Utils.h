@@ -8,9 +8,8 @@
 #include <fstream>
 
 std::string readShaderSource(const char* filePath);
-GLuint createShaderProgram();
 void printShaderLog(GLuint shader);
 void printProgramLog(int prog);
 bool checkOpenGLError();
-
+GLuint createShaderProgram(char* vert, char* frag);
 
