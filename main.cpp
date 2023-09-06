@@ -56,11 +56,12 @@ void setupVertices(void) { // 36 vertices, 12 triangles, makes 2x2x2 cube placed
 
 void init(GLFWwindow* window) {
 	renderingProgram = createShaderProgram((char*)"vert_shader.glsl", (char*)"frag_shader.glsl");
-	cameraX = 0.0f; cameraY = 0.0f; cameraZ = 8.0f;
+	cameraX = 5.0f; cameraY = 0.0f; cameraZ = 15.0f;
 	cubeLocX = 0.0f; cubeLocY = -2.0f; cubeLocZ = 0.0f; // shift down Y to reveal perspective
 	setupVertices();
 }
 void display(GLFWwindow* window, double currentTime) {
+	float start_time = glfwGetTime();
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glClear(GL_COLOR_BUFFER_BIT);
 	
@@ -75,11 +76,10 @@ void display(GLFWwindow* window, double currentTime) {
 	// build view matrix, model matrix, and model-view matrix
 	vMat = glm::translate(glm::mat4(1.0f), glm::vec3(-cameraX, -cameraY, -cameraZ));
 
-	for (int i = 0; i < 24; i++)
+	for (int i = 0; i < 1000; i++)
 	{
 		float tf = currentTime + i; // tf == "time factor", declared as type float
-		glm::mat4 tMat = glm::translate(glm::mat4(1.0f), glm::vec3(sin(.35f * tf) * 8.0f, cos(.52f * tf) * 8.0f,
-			sin(.70f * tf) * 8.0f));
+		glm::mat4 tMat = glm::translate(glm::mat4(1.0f), glm::vec3(tf/100, 0, 0));
 		glm::mat4 rMat = glm::rotate(glm::mat4(1.0f), 1.75f * tf, glm::vec3(0.0f, 1.0f, 0.0f));
 		rMat = glm::rotate(rMat, 1.75f * tf, glm::vec3(1.0f, 0.0f, 0.0f));
 		rMat = glm::rotate(rMat, 1.75f * tf, glm::vec3(0.0f, 0.0f, 1.0f));
@@ -94,6 +94,7 @@ void display(GLFWwindow* window, double currentTime) {
 		glDepthFunc(GL_LEQUAL);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 	}
+	cout << "FPS =" << 1/(glfwGetTime() - start_time) << endl;
 }
 int main(void) { // main() is unchanged from before
 	if (!glfwInit()) { exit(EXIT_FAILURE); }
@@ -102,7 +103,7 @@ int main(void) { // main() is unchanged from before
 	GLFWwindow* window = glfwCreateWindow(600, 600, "Chapter 4 - program 1", NULL, NULL);
 	glfwMakeContextCurrent(window);
 	if (glewInit() != GLEW_OK) { exit(EXIT_FAILURE); }
-	glfwSwapInterval(1);
+	//glfwSwapInterval(1);
 	init(window);
 	while (!glfwWindowShouldClose(window)) {
 		display(window, glfwGetTime());
