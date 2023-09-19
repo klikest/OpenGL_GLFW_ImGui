@@ -4,36 +4,32 @@ layout (location=0) in vec3 position;  // coord
 
 uniform mat4 v_matrix;
 uniform mat4 proj_matrix;
-uniform float tf;
+
+uniform vec3 offsets[100];
+
 
 out vec4 varyingColor;  // be interpolated by the rasterizer
 
-mat4 buildRotateX(float rad);
-mat4 buildRotateY(float rad);
-mat4 buildRotateZ(float rad);
-mat4 buildTranslate(float x, float y, float z);
+
+
 
 void main(void) {
-    float i = gl_InstanceID + tf;  // value based on time factor, but different fo each cube instance
+
+    mat4 mv_matrix = v_matrix;
     
-    float a = sin(203.0 * i/8000.0) * 403.0;
-    float b = sin(301.0 * i/4001.0) * 401.0;
-    float c = sin(400.0 * i/6003.0) * 405.0;
+    vec3 offset = offsets[gl_InstanceID];
     
-    mat4 localRotX = buildRotateX(1.75 * i);
-    mat4 localRotY = buildRotateY(1.75 * i);
-    mat4 localRotZ = buildRotateZ(1.75 * i);
-    
-    mat4 localTrans = buildTranslate(a, b, c);
-    
-    // build the maodel matrix and then the model-view matrix
-    mat4 newM_matrix = localTrans * localRotX * localRotY * localRotZ;
-    mat4 mv_matrix = v_matrix * newM_matrix;
-    
-    
-    gl_Position = proj_matrix * mv_matrix * vec4(position, 1.0);  // right-to-left
+    gl_Position = proj_matrix * mv_matrix * vec4(position + offset, 1.0);  // right-to-left
     varyingColor = vec4(position, 1.0) * 0.5 + vec4(0.5, 0.5, 0.5, 0.5);
 }
+
+
+
+
+
+
+
+
 
 // builds and returns a matrix that performs a rotation around the X axis
 mat4 buildRotateX(float rad) {
