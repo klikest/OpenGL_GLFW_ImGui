@@ -104,14 +104,11 @@ void display(GLFWwindow* window, double currentTime) {
 
     glUseProgram(renderingProgram);
 
- 
-
     // Camera/View transformation
     vMat = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
     // Projection 
     pMat = glm::perspective(fov, (GLfloat)width / (GLfloat)height, 0.1f, 100.0f);
     // Get the uniform locations
-
 
     vLoc = glGetUniformLocation(renderingProgram, "v_matrix");
     projLoc = glGetUniformLocation(renderingProgram, "proj_matrix");
