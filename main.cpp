@@ -14,7 +14,7 @@
 using namespace std;
 
 #define numVAOs 1
-#define numVBOs 1
+#define numVBOs 2
 
 //Utils util = Utils();
 float cameraX, cameraY, cameraZ;
@@ -43,18 +43,13 @@ GLfloat pitch = 0.0f;
 GLfloat lastX = width / 2.0;
 GLfloat lastY = height / 2.0;
 GLfloat fov = 45.0f;
-bool keys[1024];
+bool firstMouse = true;
 
 // Deltatime
 GLfloat deltaTime = 0.0f;	// Time between current frame and last frame
 GLfloat lastFrame = 0.0f;
 
-
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
-void mouse_callback(GLFWwindow* window, double xpos, double ypos);
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-void do_movement();
-
+glm::vec3* translations = new glm::vec3[1000000];
 
 void setupVertices(void) {
     // 12 triangles * 3 vertices * 3 values (x, y, z)
@@ -72,14 +67,39 @@ void setupVertices(void) {
         -1.0f,  1.0f, -1.0f,  1.0f,  1.0f, -1.0f,  1.0f,  1.0f,  1.0f,
          1.0f,  1.0f,  1.0f, -1.0f,  1.0f,  1.0f, -1.0f,  1.0f, -1.0f,
     };
+
+    
+    int index = 0;
+
+    for (int x = 0; x < 100; x++)
+    {
+        for (int y = 0; y < 100; y++)
+        {
+            for (int z = 0; z < 100; z++)
+            {
+                glm::vec3 trans = glm::vec3(x*2, -y*2, -z*2);
+                translations[index++] = trans;
+            }
+        }
+    }
+
+
     glGenVertexArrays(1, vao);  // creates VAO and returns the integer ID
     glBindVertexArray(vao[0]);
     glGenBuffers(numVBOs, vbo);  // creates VBO and returns the integer ID
-
     glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-
     // loads the cube vertices into the 0th VBO buffer
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertexPositions), vertexPositions, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * 1000000, &translations[0], GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    glEnableVertexAttribArray(1);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glVertexAttribDivisor(1, 1);
 }
 
 // once
@@ -93,6 +113,88 @@ void init(GLFWwindow* window) {
     // position the camera further down the positive Z axis (to see all of the cubes)
     cameraX = 0.0f; cameraY = 0.0f; cameraZ = 32.0f;
     setupVertices();
+    // Enables the Depth Buffer
+    glEnable(GL_DEPTH_TEST);
+
+    // Enables Cull Facing
+    glEnable(GL_CULL_FACE);
+    // Keeps front faces
+    glCullFace(GL_FRONT);
+    // Uses counter clock-wise standard
+    glFrontFace(GL_CCW);
+
+}
+
+
+
+void do_movement(GLFWwindow* window)
+{
+
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+
+    // Camera controls
+    GLfloat cameraSpeed = 20.0f * deltaTime;;
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        cameraPos += cameraSpeed * cameraFront;
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        cameraPos -= cameraSpeed * cameraFront;
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+        cameraPos += cameraSpeed * cameraUp;
+    if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+        cameraPos -= cameraSpeed * cameraUp;
+
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+    {
+        //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+        double xpos, ypos;
+        glfwGetCursorPos(window, &xpos, &ypos);
+
+        if (firstMouse)
+        {
+            lastX = xpos;
+            lastY = ypos;
+            firstMouse = false;
+        }
+
+        GLfloat xoffset = xpos - lastX;
+        GLfloat yoffset = lastY - ypos; // Reversed since y-coordinates go from bottom to left
+        lastX = xpos;
+        lastY = ypos;
+
+        GLfloat sensitivity = 0.05;	// Change this value to your liking
+        xoffset *= sensitivity;
+        yoffset *= sensitivity;
+
+        yaw += xoffset;
+        pitch += yoffset;
+
+        // Make sure that when pitch is out of bounds, screen doesn't get flipped
+        if (pitch > 89.0f)
+            pitch = 89.0f;
+        if (pitch < -89.0f)
+            pitch = -89.0f;
+
+        glm::vec3 front;
+        front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+        front.y = sin(glm::radians(pitch));
+        front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+        cameraFront = glm::normalize(front);
+
+       
+    }
+
+    else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE)
+    {
+        // Unhides cursor since camera is not looking around anymore
+        //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        // Makes sure the next time the camera looks around it doesn't jump
+        firstMouse = true;
+    }
+    
 }
 
 // repeatedly
@@ -107,7 +209,7 @@ void display(GLFWwindow* window, double currentTime) {
     // Camera/View transformation
     vMat = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
     // Projection 
-    pMat = glm::perspective(fov, (GLfloat)width / (GLfloat)height, 0.1f, 100.0f);
+    pMat = glm::perspective(fov, (GLfloat)width / (GLfloat)height, 0.1f, 1000.0f);
     // Get the uniform locations
 
     vLoc = glGetUniformLocation(renderingProgram, "v_matrix");
@@ -116,113 +218,36 @@ void display(GLFWwindow* window, double currentTime) {
     glUniformMatrix4fv(vLoc, 1, GL_FALSE, glm::value_ptr(vMat));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(pMat));
 
-
+    glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
     glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
-    glEnableVertexAttribArray(0);
+
+    glEnableVertexAttribArray(1);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glVertexAttribDivisor(1, 1);
 
 
-    do_movement();
+    do_movement(window);
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
 
-    glDrawArrays(GL_TRIANGLES, 0, 36);
+    glDrawArraysInstanced(GL_TRIANGLES, 0, 36, 1000000);
 }
 
-
-// Is called whenever a key is pressed/released via GLFW
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
-{
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, GL_TRUE);
-    if (key >= 0 && key < 1024)
-    {
-        if (action == GLFW_PRESS)
-            keys[key] = true;
-        else if (action == GLFW_RELEASE)
-            keys[key] = false;
-    }
-}
-
-void do_movement()
-{
-    // Camera controls
-    GLfloat cameraSpeed = 5.0f * deltaTime;;
-    if (keys[GLFW_KEY_W])
-        cameraPos += cameraSpeed * cameraFront;
-    if (keys[GLFW_KEY_S])
-        cameraPos -= cameraSpeed * cameraFront;
-    if (keys[GLFW_KEY_A])
-        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-    if (keys[GLFW_KEY_D])
-        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-    if (keys[GLFW_KEY_SPACE])
-        cameraPos += cameraSpeed * cameraUp;
-    if (keys[GLFW_KEY_LEFT_CONTROL])
-        cameraPos -= cameraSpeed * cameraUp;
-}
-
-bool firstMouse = true;
-void mouse_callback(GLFWwindow* window, double xpos, double ypos)
-{
-    if (firstMouse)
-    {
-        lastX = xpos;
-        lastY = ypos;
-        firstMouse = false;
-    }
-
-    GLfloat xoffset = xpos - lastX;
-    GLfloat yoffset = lastY - ypos; // Reversed since y-coordinates go from bottom to left
-    lastX = xpos;
-    lastY = ypos;
-
-    GLfloat sensitivity = 0.05;	// Change this value to your liking
-    xoffset *= sensitivity;
-    yoffset *= sensitivity;
-
-    yaw += xoffset;
-    pitch += yoffset;
-
-    // Make sure that when pitch is out of bounds, screen doesn't get flipped
-    if (pitch > 89.0f)
-        pitch = 89.0f;
-    if (pitch < -89.0f)
-        pitch = -89.0f;
-
-    glm::vec3 front;
-    front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-    front.y = sin(glm::radians(pitch));
-    front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-    cameraFront = glm::normalize(front);
-}
-
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
-{
-    if (fov >= 1.0f && fov <= 45.0f)
-        fov -= yoffset;
-    if (fov <= 1.0f)
-        fov = 1.0f;
-    if (fov >= 45.0f)
-        fov = 45.0f;
-}
 
 int main(void) {
     if (!glfwInit()) { exit(EXIT_FAILURE); }
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // I don't know what this does
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwSwapInterval(1);
     GLFWwindow* window = glfwCreateWindow(800, 600, "Chapter4 - exercise2", nullptr, nullptr);
     glfwMakeContextCurrent(window);
     if (glewInit() != GLEW_OK) { exit(EXIT_FAILURE); }
-
-    // Set the required callback functions
-    glfwSetKeyCallback(window, key_callback);
-    glfwSetCursorPosCallback(window, mouse_callback);
-    glfwSetScrollCallback(window, scroll_callback);
 
     // GLFW Options
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -230,34 +255,18 @@ int main(void) {
     init(window);
 
 
-    glm::vec3 translations[100];
-    int index = 0;
-    float offset = 0.1f;
-    for (int y = -10; y < 10; y += 2)
-    {
-        for (int x = -10; x < 10; x += 2)
-        {
-            glm::vec3 translation;
-            translation.x = (float)x / 10.0f + offset;
-            translation.y = (float)y / 10.0f + offset;
-            translation.z = 0;
-            translations[index++] = translation;
-        }
-    }
-
-
-
-
     while (!glfwWindowShouldClose(window)) {
         GLfloat currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
-        
+        cout << 1 / deltaTime << endl;
         display(window, glfwGetTime());
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
+
+    delete[] translations;
     glfwDestroyWindow(window);
     glfwTerminate();
     exit(EXIT_SUCCESS);
