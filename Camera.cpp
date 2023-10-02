@@ -50,7 +50,7 @@
 
         }
 
-        if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+        if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
         {
             //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
             double xpos, ypos;
@@ -89,7 +89,7 @@
 
         }
 
-        else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE)
+        else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE)
         {
             // Unhides cursor since camera is not looking around anymore
             //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);

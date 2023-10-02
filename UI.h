@@ -6,5 +6,5 @@
 #include <GLFW\glfw3.h>
 
 void InitUI(GLFWwindow* window);
-void RenderUI(GLFWwindow* window);
+void RenderUI(GLFWwindow* window, float deltatime);
 

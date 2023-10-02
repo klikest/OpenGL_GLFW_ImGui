@@ -3,6 +3,8 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include <GLFW\glfw3.h>
+#include <string>
+#include <iostream>
 
 
 void InitUI(GLFWwindow* window)
@@ -26,19 +28,21 @@ void InitUI(GLFWwindow* window)
 
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 430");
+
 }
 
-void RenderUI(GLFWwindow* window)
+void RenderUI(GLFWwindow* window, float deltatime)
 {
+	int FPS = (int)(1 / deltatime);
+	std::string FPS_s = "FPS =" + std::to_string(FPS);
+
+
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
-	//ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
-	//ImGui::SetNextWindowSize(ImVec2(300.0f, 300.0f));
-	ImGui::Begin("My First Tool");
-	ImGui::Text("12345");
+	ImGui::Begin("Info");
+	ImGui::Text(FPS_s.c_str());
 	ImGui::End();
-	//ImGui::ShowDemoWindow();
 	ImGui::Render();
 	int display_w, display_h;
 	glfwGetFramebufferSize(window, &display_w, &display_h);
