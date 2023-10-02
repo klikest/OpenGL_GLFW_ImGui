@@ -3,6 +3,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <string>
+#include <vector>
 #include <iostream>
 #include <fstream>
 #include <cmath>
@@ -49,7 +50,8 @@ bool firstMouse = true;
 GLfloat deltaTime = 0.0f;	// Time between current frame and last frame
 GLfloat lastFrame = 0.0f;
 
-glm::vec3* translations = new glm::vec3[1000000];
+
+glm::vec3* translations = new glm::vec3[1000];
 
 void setupVertices(void) {
     // 12 triangles * 3 vertices * 3 values (x, y, z)
@@ -71,11 +73,11 @@ void setupVertices(void) {
     
     int index = 0;
 
-    for (int x = 0; x < 100; x++)
+    for (int x = 0; x < 10; x++)
     {
-        for (int y = 0; y < 100; y++)
+        for (int y = 0; y < 10; y++)
         {
-            for (int z = 0; z < 100; z++)
+            for (int z = 0; z < 10; z++)
             {
                 glm::vec3 trans = glm::vec3(x*2, -y*2, -z*2);
                 translations[index++] = trans;
@@ -92,7 +94,7 @@ void setupVertices(void) {
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertexPositions), vertexPositions, GL_STATIC_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * 1000000, &translations[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * 1000, &translations[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glEnableVertexAttribArray(1);
@@ -126,10 +128,9 @@ void init(GLFWwindow* window) {
 }
 
 
-
 void do_movement(GLFWwindow* window)
 {
-
+    
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
     // Camera controls
@@ -146,6 +147,11 @@ void do_movement(GLFWwindow* window)
         cameraPos += cameraSpeed * cameraUp;
     if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
         cameraPos -= cameraSpeed * cameraUp;
+    if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
+    {
+
+        
+    }
 
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
     {
@@ -222,6 +228,12 @@ void display(GLFWwindow* window, double currentTime) {
     glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
     glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
 
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * 1000, &translations[0], GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+
     glEnableVertexAttribArray(1);
     glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
@@ -234,7 +246,7 @@ void display(GLFWwindow* window, double currentTime) {
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
 
-    glDrawArraysInstanced(GL_TRIANGLES, 0, 36, 1000000);
+    glDrawArraysInstanced(GL_TRIANGLES, 0, 36, 1000);
 }
 
 
@@ -245,7 +257,7 @@ int main(void) {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwSwapInterval(1);
-    GLFWwindow* window = glfwCreateWindow(800, 600, "Chapter4 - exercise2", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(800, 600, "Voxel Engine", nullptr, nullptr);
     glfwMakeContextCurrent(window);
     if (glewInit() != GLEW_OK) { exit(EXIT_FAILURE); }
 
@@ -259,7 +271,7 @@ int main(void) {
         GLfloat currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
-        cout << 1 / deltaTime << endl;
+        //cout << 1 / deltaTime << endl;
         display(window, glfwGetTime());
         glfwSwapBuffers(window);
         glfwPollEvents();
