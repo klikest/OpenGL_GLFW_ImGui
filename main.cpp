@@ -19,11 +19,12 @@
 #include "Utils.h"
 #include "Camera.h"
 #include "UI.h"
+#include "UI_Data.h"
 
 using namespace std;
 
 #define numVAOs 1
-#define numVBOs 2
+#define numVBOs 3
 
 //Utils util = Utils();
 float cameraX, cameraY, cameraZ;
@@ -41,7 +42,148 @@ GLfloat deltaTime = 0.0f;	// Time between current frame and last frame
 GLfloat lastFrame = 0.0f;
 
 
-glm::vec3* translations = new glm::vec3[1000000];
+
+int r = 5, h = 5;
+int r_t = 1, h_t = 1;
+
+
+bool scalar_cyl(float r, float x, float y)
+{
+    if ((x * x) + (y * y) < (r * r))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool scalar_sphere(float r, float x, float y, float z)
+{
+    if ((x * x) + (y * y) + (z * z)< (r * r))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
+struct Grid
+{
+    std::vector<glm::vec3> grid;
+    std::vector<glm::vec3> grid_draw;
+    std::vector<int> voxel_id;
+    std::vector<glm::vec3> grid_tool;
+    std::vector<glm::vec3> grid_blank;
+
+
+    void create_cyl(int r, int h)
+    {
+        grid_blank.clear();
+        for (int i = 0; i < h; i++)
+        {
+            for (int j = -r; j < r; j++)
+            {
+                    for (int k =-r; k < r; k++)
+                    {
+                        if (scalar_cyl(r, j, k))
+                        {
+                            //grid.push_back(glm::vec3(i * 2, j * 2, -k * 2));
+                            //voxel_id.push_back(1);
+                            grid_blank.push_back(glm::vec3(i * 2, j * 2, -k * 2));
+                        }
+                        else
+                        {
+                            //grid.push_back(glm::vec3(i * 2, j * 2, -k * 2));
+                            //voxel_id.push_back(-1);
+                        }
+                        
+                    }
+               
+            }
+        }
+
+    }
+
+    void create_sphere(int r, float dx, float dy, float dz)
+    {
+        grid_tool.clear();
+        for (int i = -r; i < r; i++)
+        {
+            for (int j = -r; j < r; j++)
+            {
+                for (int k = -r; k < r; k++)
+                {
+                    if (scalar_sphere(r, i, j, k))
+                    {
+                        //grid.push_back(glm::vec3(i * 2 + dx, j * 2 + dy, -k * 2 + dz));
+                        //voxel_id.push_back(1);
+                        grid_tool.push_back(glm::vec3(i * 2 + dx, j * 2 + dy, -k * 2 + dz));
+                    }
+                    else
+                    {
+                        //grid.push_back(glm::vec3(i * 2 + dx, j * 2 + dy, -k * 2 + dz));
+                        //voxel_id.push_back(0);
+                    }
+
+                }
+
+            }
+        }
+
+    }
+
+    void bolean_cut()
+    {
+        grid_draw.clear();
+
+
+        for (int i = 0; i < grid_blank.size(); i++)
+        {
+            for (int j = 0; j < grid_tool.size(); j++)
+            {
+                if ((abs(grid_blank[i].x == grid_tool[j].x) && abs(grid_blank[i].y == grid_tool[j].y) && abs(grid_blank[i].z == grid_tool[j].z)))
+                {
+                    grid_blank.erase(std::remove(grid_blank.begin(), grid_blank.end(), grid_blank[i]), grid_blank.end());
+                }
+            }
+        }
+
+        for (int i = 0; i < grid_blank.size(); i++)
+        {
+            grid_draw.push_back(grid_blank[i]);
+        }
+
+        for (int j = 0; j < grid_tool.size(); j++)
+        {
+            grid_draw.push_back(grid_tool[j]);
+        }
+
+    }
+
+
+    void create_draw_grid()
+    {
+        grid_draw.clear();
+        for (int i = 0; i < grid_blank.size(); i++)
+        {
+            grid_draw.push_back(grid_blank[i]);
+        }
+
+        for (int j = 0; j < grid_tool.size(); j++)
+        {
+            grid_draw.push_back(grid_tool[j]);
+        }
+    }
+
+
+
+};
+
 
 void setupVertices(void) {
     // 12 triangles * 3 vertices * 3 values (x, y, z)
@@ -61,21 +203,9 @@ void setupVertices(void) {
     };
 
     
-    int index = 0;
-
-    for (int x = 0; x < 100; x++)
-    {
-        for (int y = 0; y < 100; y++)
-        {
-            for (int z = 0; z < 100; z++)
-            {
-                glm::vec3 trans = glm::vec3(x*2, -y*2, -z*2);
-                translations[index++] = trans;
-            }
-        }
-    }
-
-
+    Grid grid;
+    //grid.create_cyl(r, h);
+    //grid.create_sphere(10, 100, 0, 0);
     glGenVertexArrays(1, vao);  // creates VAO and returns the integer ID
     glBindVertexArray(vao[0]);
     glGenBuffers(numVBOs, vbo);  // creates VBO and returns the integer ID
@@ -84,7 +214,7 @@ void setupVertices(void) {
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertexPositions), vertexPositions, GL_STATIC_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * 1000000, &translations[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * grid.grid_draw.size(), grid.grid_draw.data(), GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glEnableVertexAttribArray(1);
@@ -92,6 +222,13 @@ void setupVertices(void) {
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glVertexAttribDivisor(1, 1);
+
+    glEnableVertexAttribArray(2);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(int) * grid.voxel_id.size(), grid.voxel_id.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(int), (void*)0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 // once
@@ -109,7 +246,7 @@ void init(GLFWwindow* window) {
 
 
 // repeatedly
-void display(GLFWwindow* window, double currentTime) {
+void display(GLFWwindow* window, double currentTime, Grid grid) {
 
     glClear(GL_DEPTH_BUFFER_BIT);
     glClearColor(0.0, 0.0, 0.0, 1.0);
@@ -122,7 +259,7 @@ void display(GLFWwindow* window, double currentTime) {
     glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * 1000000, &translations[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * grid.grid_draw.size(), grid.grid_draw.data(), GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glEnableVertexAttribArray(1);
@@ -131,10 +268,16 @@ void display(GLFWwindow* window, double currentTime) {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glVertexAttribDivisor(1, 1);
 
+    glEnableVertexAttribArray(2);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(int) * grid.voxel_id.size(), grid.voxel_id.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(int), (void*)0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
 
-    glDrawArraysInstanced(GL_TRIANGLES, 0, 36, 1000000);
+    glDrawArraysInstanced(GL_TRIANGLES, 0, 36, grid.grid_draw.size());
 }
 
 
@@ -156,22 +299,66 @@ int main(void) {
     init(window);
     InitUI(window);
     
-    Camera camera(window, glm::vec3(0.0f, 0.0f, 20.0f));
+    Camera camera(window, glm::vec3(-10.0f, 10.0f, 20.0f));
+
+    Grid grid;
+    grid.create_cyl(15, 20);
+
+
+    UI_Data data;
+    data.h = h;
+    data.r = r;
+    data.camPos = camera.cameraPos;
+    data.cam_speed = camera.cam_speed;
+    camera.cam_speed = 100;
+
+    
+    data.h = h;
+    data.r = r;
+  
+    
+
+    float x_t = -20;
+    float y_t = 0;
+    float z_t = 0;
+
+    float rad = 5;
 
     while (!glfwWindowShouldClose(window)) {
+
+        if (glfwGetKey(window, GLFW_KEY_KP_6) == GLFW_PRESS) { x_t += 2; }
+        if (glfwGetKey(window, GLFW_KEY_KP_4) == GLFW_PRESS) { x_t -= 2; }
+        if (glfwGetKey(window, GLFW_KEY_KP_8) == GLFW_PRESS) { z_t += 2; }
+        if (glfwGetKey(window, GLFW_KEY_KP_2) == GLFW_PRESS) { z_t -= 2; }
+        if (glfwGetKey(window, GLFW_KEY_KP_7) == GLFW_PRESS) { y_t += 2; }
+        if (glfwGetKey(window, GLFW_KEY_KP_9) == GLFW_PRESS) { y_t -= 2; }
+        if (glfwGetKey(window, GLFW_KEY_KP_3) == GLFW_PRESS) { rad += 1; }
+        
+        grid.create_sphere(rad, x_t, z_t, y_t);
+        grid.bolean_cut();
+        //grid.create_draw_grid();
+
+        data.camPos = camera.cameraPos;
+        data.cam_speed = camera.cam_speed;
+        data.cam_pitch = camera.pitch;
+        data.cam_yaw = camera.yaw;
+
         GLfloat currentFrame = (GLfloat)glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
-        display(window, glfwGetTime());
-        RenderUI(window, deltaTime);
+        data.delta_time = deltaTime;
+        display(window, glfwGetTime(), grid);
+        RenderUI(window, data);
         camera.MoveCamera(window, deltaTime);
         camera.UpdateMatrix(renderingProgram);
         glfwSwapBuffers(window);
         glfwPollEvents();
+
+
+
     }
 
 
-    delete[] translations;
     glfwDestroyWindow(window);
     glfwTerminate();
     exit(EXIT_SUCCESS);

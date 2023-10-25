@@ -26,12 +26,13 @@
         lastY = (GLfloat)(height / 2.0);
     }
 
+
     void Camera::MoveCamera(GLFWwindow* window, GLfloat deltaTime)
     {
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
         // Camera controls
-        GLfloat cameraSpeed = 20.0f * deltaTime;;
+        GLfloat cameraSpeed = cam_speed * deltaTime;;
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
             cameraPos += cameraSpeed * cameraFront;
         if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
@@ -46,7 +47,7 @@
             cameraPos -= cameraSpeed * cameraUp;
         if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
         {
-
+      
 
         }
 
