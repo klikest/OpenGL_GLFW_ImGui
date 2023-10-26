@@ -42,9 +42,12 @@ void RenderUI(GLFWwindow* window, UI_Data data)
 {
 	int FPS = (int)(1 / data.delta_time);
 	std::string FPS_s = "FPS =" + std::to_string(FPS);
-	std::string cam_x = "tool X =" + std::to_string(data.x_t);
-	std::string cam_y = "tool Y =" + std::to_string(data.y_t);
-	std::string cam_z = "tool Z =" + std::to_string(data.z_t);
+	std::string t_x = "tool X =" + std::to_string(data.x_t);
+	std::string t_y = "tool Y =" + std::to_string(data.y_t);
+	std::string t_z = "tool Z =" + std::to_string(data.z_t);
+	std::string cam_x = "Cavera X =" + std::to_string(data.camPos.x);
+	std::string cam_y = "Cavera Y =" + std::to_string(data.camPos.y);
+	std::string cam_z = "Cavera Z =" + std::to_string(data.camPos.z);
 	std::string num_t = "Num tool voxels =" + std::to_string(data.num_vert_t);
 	std::string num_b = "Num blank voxels =" + std::to_string(data.num_vert_b);
 	std::string r = u8"Радиус инструмента =" + std::to_string(round(data.r_t));
@@ -68,12 +71,15 @@ void RenderUI(GLFWwindow* window, UI_Data data)
 
 	ImGui::Begin("Info");
 	ImGui::Text(FPS_s.c_str());
-	ImGui::Text(cam_x.c_str());
-	ImGui::Text(cam_y.c_str());
-	ImGui::Text(cam_z.c_str());
+	ImGui::Text(t_x.c_str());
+	ImGui::Text(t_y.c_str());
+	ImGui::Text(t_z.c_str());
 	ImGui::Text(num_t.c_str());
 	ImGui::Text(num_b.c_str());
 	ImGui::Text(r.c_str());
+	ImGui::Text(cam_x.c_str());
+	ImGui::Text(cam_y.c_str());
+	ImGui::Text(cam_z.c_str());
 	//ImGui::ShowDemoWindow();
 	ImGui::End();
 	ImGui::Render();

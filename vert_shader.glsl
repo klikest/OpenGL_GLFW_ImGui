@@ -25,6 +25,8 @@ vec3 hash31(float p)
 void main(void) 
 {
 
+    //gl_PointSize = 1.0;
+
     mat4 mv_matrix = v_matrix;
     voxel_color = hash31(voxel_id);   
     

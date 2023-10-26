@@ -17,6 +17,8 @@ public:
     float h_b;
 
     float r_t;
+    float h_t;
+    float alfa;
 
     float x_t, y_t, z_t;
     float x_b, y_b, z_b;

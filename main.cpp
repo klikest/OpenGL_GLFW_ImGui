@@ -78,9 +78,10 @@ bool scalar_cyl(float r, float x, float y)
     }
 }
 
+
 bool scalar_sphere(float r, float x, float y, float z)
 {
-    if ((x * x) + (y * y) + (z * z) > (r * r)-0.1*(r * r) && (x * x) + (y * y) + (z * z) < (r * r))
+    if ((x * x) + (y * y) + (z * z) > (r * r)-0.2*(r * r) && (x * x) + (y * y) + (z * z) < (r * r))
     {
         return true;
     }
@@ -98,6 +99,12 @@ struct Grid
     std::vector<int> voxel_id;
     std::vector<glm::vec3> grid_tool;
     std::vector<glm::vec3> grid_blank;
+    float x_blank_min;
+    float y_blank_min;
+    float z_blank_min;
+    float x_blank_max;
+    float y_blank_max;
+    float z_blank_max;
 
 
     void create_cyl(int r, int h)
@@ -120,6 +127,31 @@ struct Grid
 
     }
 
+    void create_tool(int r, int h, float dx, float dy, float dz, float alfa)
+    {
+        grid_tool.clear();
+        for (int i = 0; i < h; i+=1)
+        {
+            for (int j = -r; j < r; j+=1)
+            {
+                for (int k = -r; k < r; k+=1)
+                {
+                    if (scalar_cyl(r, j, k))
+                    {
+                        float x_ = 2*(cosf(alfa) * (i + dx) + sinf(alfa) * (k + dz));
+                        float y_ = 2*(j+dy);
+                        float z_ = 2*(-sinf(alfa) * (i + dx) + cosf(alfa) * (k + dz));
+                        grid_tool.push_back(glm::vec3(round(x_), round(y_), round(z_)));
+                    }
+
+                }
+            }
+        }
+
+    }
+
+
+
     void create_sphere(int r, float dx, float dy, float dz)
     {
         grid_tool.clear();
@@ -131,14 +163,11 @@ struct Grid
                 {
                     if (scalar_sphere(r, i, j, k))
                     {
-                        //grid.push_back(glm::vec3(i * 2 + dx, j * 2 + dy, -k * 2 + dz));
-                        //voxel_id.push_back(1);
                         grid_tool.push_back(glm::vec3(i * 2 + dx, j * 2 + dy, -k * 2 + dz));
                     }
                     else
                     {
-                        //grid.push_back(glm::vec3(i * 2 + dx, j * 2 + dy, -k * 2 + dz));
-                        //voxel_id.push_back(0);
+
                     }
 
                 }
@@ -150,20 +179,56 @@ struct Grid
 
     void bolean_cut()
     {
+        float t_x_min = grid_tool[0].x, t_x_max = grid_tool[0].x, t_y_min = grid_tool[0].y, t_y_max = grid_tool[0].y, t_z_min = grid_tool[0].z, t_z_max = grid_tool[0].z;
+        float b_x_min = grid_blank[0].x, b_x_max = grid_blank[0].x, b_y_min = grid_blank[0].y, b_y_max = grid_blank[0].y, b_z_min = grid_blank[0].z, b_z_max = grid_blank[0].z;
+
+        for (int i = 0; i < grid_tool.size(); i++)
+        {
+            float new_x = grid_tool[i].x;
+            float new_y = grid_tool[i].y;
+            float new_z = grid_tool[i].z;
+            if (new_x > t_x_max) { t_x_max = new_x; }
+            if (new_x < t_x_min) { t_x_min = new_x; }
+            if (new_y > t_y_max) { t_y_max = new_y; }
+            if (new_y < t_y_min) { t_y_min = new_y; }
+            if (new_z > t_z_max) { t_z_max = new_z; }
+            if (new_z < t_z_min) { t_z_min = new_z; }
+        }
+        for (int i = 0; i < grid_blank.size(); i++)
+        {
+            float new_x = grid_blank[i].x;
+            float new_y = grid_blank[i].y;
+            float new_z = grid_blank[i].z;
+            if (new_x > b_x_max) { b_x_max = new_x; }
+            if (new_x < b_x_min) { b_x_min = new_x; }
+            if (new_y > b_y_max) { b_y_max = new_y; }
+            if (new_y < b_y_min) { b_y_min = new_y; }
+            if (new_z > b_z_max) { b_z_max = new_z; }
+            if (new_z < b_z_min) { b_z_min = new_z; }
+        }
+
+
         grid_draw.clear();
 
 
         for (int i = 0; i < grid_blank.size(); i++)
         {
-            for (int j = 0; j < grid_tool.size(); j++)
+            if (!(grid_blank[i].x > t_x_max || grid_blank[i].x < t_x_min || grid_blank[i].y > t_y_max || grid_blank[i].y < t_y_min || grid_blank[i].z > t_z_max || grid_blank[i].z < t_z_min))
             {
-                if (grid_tool[j]==grid_blank[i])
+                for (int j = 0; j < grid_tool.size(); j++)
                 {
-                    //grid_blank.erase(std::remove(grid_blank.begin(), grid_blank.end(), grid_blank[i]), grid_blank.end());
-                    grid_blank[i] = glm::vec3(1000, 1000, 1000);
-                }
+                    if (!(grid_tool[j].x > b_x_max || grid_tool[j].x < b_x_min || grid_tool[j].y > b_y_max || grid_tool[j].y < b_y_min || grid_tool[j].z > b_z_max || grid_tool[j].z < b_z_min))
+                    {
 
+                        if (grid_tool[j].x == grid_blank[i].x && grid_tool[j].y == grid_blank[i].y && grid_tool[j].z == grid_blank[i].z)
+                        {
+                            grid_blank.erase(std::remove(grid_blank.begin(), grid_blank.end(), grid_blank[i]), grid_blank.end());
+                        }
+                    }
+                }         
+                      
             }
+            
         }
 
         for (int i = 0; i < grid_blank.size(); i++)
@@ -249,7 +314,7 @@ void init(GLFWwindow* window) {
     renderingProgram = createShaderProgram((char*)"vert_shader.glsl", (char*)"frag_shader.glsl");
 
     setupVertices();
-    
+
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_FRONT);
@@ -290,6 +355,9 @@ void display(GLFWwindow* window, double currentTime, Grid grid) {
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
 
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_FRONT);
+    
     glDrawArraysInstanced(GL_TRIANGLES, 0, 36, grid.grid_draw.size());
 }
 
@@ -315,20 +383,26 @@ int main(void) {
     Camera camera(window, glm::vec3(-10.0f, 10.0f, 20.0f));
 
 
+    camera.cameraPos = glm::vec3(-10, 10, 200);
 
 
     UI_Data data;
     camera.cam_speed = 100;
-    data.r_b = 30;
-    data.h_b = 30;
+    data.r_b = 40;
+    data.h_b = 80;
+    data.r_t = 25;
 
     Grid grid;
     grid.create_cyl(data.r_b, data.h_b);
-
-    float x_t = -20;
-    float y_t = 0;
-    float z_t = 0;
     
+
+    data.x_t = -12;
+    data.y_t = 54;
+    data.z_t = -50;
+    data.alfa = 3.14/2;
+    data.h_t = 20;
+    
+    grid.create_tool(data.r_t, 10, data.x_t, data.y_t, data.z_t, data.alfa);
 
     float rad = 5;
 
@@ -338,14 +412,14 @@ int main(void) {
         
         
 
-        if (glfwGetKey(window, GLFW_KEY_KP_6) == GLFW_PRESS) { x_t += 2; }
-        if (glfwGetKey(window, GLFW_KEY_KP_4) == GLFW_PRESS) { x_t -= 2; }
-        if (glfwGetKey(window, GLFW_KEY_KP_8) == GLFW_PRESS) { z_t += 2; }
-        if (glfwGetKey(window, GLFW_KEY_KP_2) == GLFW_PRESS) { z_t -= 2; }
-        if (glfwGetKey(window, GLFW_KEY_KP_7) == GLFW_PRESS) { y_t += 2; }
-        if (glfwGetKey(window, GLFW_KEY_KP_9) == GLFW_PRESS) { y_t -= 2; }
-        if (glfwGetKey(window, GLFW_KEY_KP_3) == GLFW_PRESS) { rad += 1; }
-        if (glfwGetKey(window, GLFW_KEY_KP_1) == GLFW_PRESS) { rad -= 1; }
+        if (glfwGetKey(window, GLFW_KEY_KP_6) == GLFW_PRESS) { data.x_t += 1; }
+        if (glfwGetKey(window, GLFW_KEY_KP_4) == GLFW_PRESS) { data.x_t -= 1; }
+        if (glfwGetKey(window, GLFW_KEY_KP_8) == GLFW_PRESS) { data.z_t += 1; }
+        if (glfwGetKey(window, GLFW_KEY_KP_2) == GLFW_PRESS) { data.z_t -= 1; }
+        if (glfwGetKey(window, GLFW_KEY_KP_7) == GLFW_PRESS) { data.y_t += 1; }
+        if (glfwGetKey(window, GLFW_KEY_KP_9) == GLFW_PRESS) { data.y_t -= 1; }
+        if (glfwGetKey(window, GLFW_KEY_KP_3) == GLFW_PRESS) { data.r_t += 1; }
+        if (glfwGetKey(window, GLFW_KEY_KP_1) == GLFW_PRESS) { data.r_t -= 1; }
         if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) 
         { 
             data.r_b -= 1; 
@@ -366,27 +440,38 @@ int main(void) {
             data.h_b += 1;
             grid.create_cyl(data.r_b, data.h_b);
         }
+        if (glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS)
+        {
+            data.alfa += 0.05;
+        }
+        if (glfwGetKey(window, GLFW_KEY_6) == GLFW_PRESS)
+        {
+            data.alfa -= 0.05;
+        }
+        if (glfwGetKey(window, GLFW_KEY_7) == GLFW_PRESS)
+        {
+            data.h_t += 1;
+        }
+        if (glfwGetKey(window, GLFW_KEY_8) == GLFW_PRESS)
+        {
+            data.h_t -= 1;
+        }
         
-
-        data.x_t = x_t;
-        data.y_t = y_t;
-        data.z_t = z_t;
 
         data.num_vert_b = grid.grid_blank.size();
         data.num_vert_t = grid.grid_tool.size();
 
-        data.r_t = rad;
 
         float t_1 = (GLfloat)glfwGetTime();
         
-
-        grid.create_sphere(rad, x_t, z_t, y_t);
+        grid.create_tool(data.r_t, data.h_t, data.x_t, data.y_t, data.z_t, data.alfa);
+        //grid.create_sphere(data.r_t, x_t, z_t, y_t);
 
         float t_2 = (GLfloat)glfwGetTime();
         
 
-        //grid.bolean_cut();
-        grid.create_draw_grid();
+        grid.bolean_cut();
+        //grid.create_draw_grid();
 
         float t_3 = (GLfloat)glfwGetTime();
         
