@@ -47,6 +47,25 @@ int r = 5, h = 5;
 int r_t = 1, h_t = 1;
 
 
+
+std::vector<float> add_data_to_plot(std::vector<float> data, float new_data)
+{
+    if (data.size() < 500)
+    {
+        data.push_back(new_data);
+    }
+    else
+    {
+        data.erase(data.begin());
+        data.push_back(new_data);
+    }
+
+    return data;
+}
+
+
+
+
 bool scalar_cyl(float r, float x, float y)
 {
     if ((x * x) + (y * y) < (r * r))
@@ -61,7 +80,7 @@ bool scalar_cyl(float r, float x, float y)
 
 bool scalar_sphere(float r, float x, float y, float z)
 {
-    if ((x * x) + (y * y) + (z * z)< (r * r))
+    if ((x * x) + (y * y) + (z * z) > (r * r)-0.1*(r * r) && (x * x) + (y * y) + (z * z) < (r * r))
     {
         return true;
     }
@@ -92,18 +111,10 @@ struct Grid
                     {
                         if (scalar_cyl(r, j, k))
                         {
-                            //grid.push_back(glm::vec3(i * 2, j * 2, -k * 2));
-                            //voxel_id.push_back(1);
                             grid_blank.push_back(glm::vec3(i * 2, j * 2, -k * 2));
                         }
-                        else
-                        {
-                            //grid.push_back(glm::vec3(i * 2, j * 2, -k * 2));
-                            //voxel_id.push_back(-1);
-                        }
-                        
+                     
                     }
-               
             }
         }
 
@@ -146,10 +157,12 @@ struct Grid
         {
             for (int j = 0; j < grid_tool.size(); j++)
             {
-                if ((abs(grid_blank[i].x == grid_tool[j].x) && abs(grid_blank[i].y == grid_tool[j].y) && abs(grid_blank[i].z == grid_tool[j].z)))
+                if (grid_tool[j]==grid_blank[i])
                 {
-                    grid_blank.erase(std::remove(grid_blank.begin(), grid_blank.end(), grid_blank[i]), grid_blank.end());
+                    //grid_blank.erase(std::remove(grid_blank.begin(), grid_blank.end(), grid_blank[i]), grid_blank.end());
+                    grid_blank[i] = glm::vec3(1000, 1000, 1000);
                 }
+
             }
         }
 
@@ -302,21 +315,11 @@ int main(void) {
     Camera camera(window, glm::vec3(-10.0f, 10.0f, 20.0f));
 
     Grid grid;
-    grid.create_cyl(15, 20);
+    grid.create_cyl(20, 10);
 
 
     UI_Data data;
-    data.h = h;
-    data.r = r;
-    data.camPos = camera.cameraPos;
-    data.cam_speed = camera.cam_speed;
     camera.cam_speed = 100;
-
-    
-    data.h = h;
-    data.r = r;
-  
-    
 
     float x_t = -20;
     float y_t = 0;
@@ -324,7 +327,11 @@ int main(void) {
 
     float rad = 5;
 
+
     while (!glfwWindowShouldClose(window)) {
+
+        
+        
 
         if (glfwGetKey(window, GLFW_KEY_KP_6) == GLFW_PRESS) { x_t += 2; }
         if (glfwGetKey(window, GLFW_KEY_KP_4) == GLFW_PRESS) { x_t -= 2; }
@@ -333,10 +340,31 @@ int main(void) {
         if (glfwGetKey(window, GLFW_KEY_KP_7) == GLFW_PRESS) { y_t += 2; }
         if (glfwGetKey(window, GLFW_KEY_KP_9) == GLFW_PRESS) { y_t -= 2; }
         if (glfwGetKey(window, GLFW_KEY_KP_3) == GLFW_PRESS) { rad += 1; }
+        if (glfwGetKey(window, GLFW_KEY_KP_1) == GLFW_PRESS) { rad -= 1; }
         
+
+        data.x_t = x_t;
+        data.y_t = y_t;
+        data.z_t = z_t;
+
+        data.num_vert_b = grid.grid_blank.size();
+        data.num_vert_t = grid.grid_tool.size();
+
+        data.r_t = rad;
+
+        float t_1 = (GLfloat)glfwGetTime();
+        
+
         grid.create_sphere(rad, x_t, z_t, y_t);
+
+        float t_2 = (GLfloat)glfwGetTime();
+        
+
         grid.bolean_cut();
         //grid.create_draw_grid();
+
+        float t_3 = (GLfloat)glfwGetTime();
+        
 
         data.camPos = camera.cameraPos;
         data.cam_speed = camera.cam_speed;
@@ -353,12 +381,19 @@ int main(void) {
         camera.UpdateMatrix(renderingProgram);
         glfwSwapBuffers(window);
         glfwPollEvents();
+        float t_0 = (GLfloat)glfwGetTime();
+
+        //data.t0 = add_data_to_plot(data.t0, (t_1 - t_0));
+        data.t1 = add_data_to_plot(data.t1, (t_2 - t_1));
+        data.t2 = add_data_to_plot(data.t2, (t_3 - t_2));
+        data.t3 = add_data_to_plot(data.t3, (t_0 - t_3));
 
 
 
     }
 
-
+    ImGui::DestroyContext();
+    ImPlot::DestroyContext();
     glfwDestroyWindow(window);
     glfwTerminate();
     exit(EXIT_SUCCESS);
