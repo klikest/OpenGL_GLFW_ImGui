@@ -314,16 +314,21 @@ int main(void) {
     
     Camera camera(window, glm::vec3(-10.0f, 10.0f, 20.0f));
 
-    Grid grid;
-    grid.create_cyl(20, 10);
+
 
 
     UI_Data data;
     camera.cam_speed = 100;
+    data.r_b = 30;
+    data.h_b = 30;
+
+    Grid grid;
+    grid.create_cyl(data.r_b, data.h_b);
 
     float x_t = -20;
     float y_t = 0;
     float z_t = 0;
+    
 
     float rad = 5;
 
@@ -341,6 +346,26 @@ int main(void) {
         if (glfwGetKey(window, GLFW_KEY_KP_9) == GLFW_PRESS) { y_t -= 2; }
         if (glfwGetKey(window, GLFW_KEY_KP_3) == GLFW_PRESS) { rad += 1; }
         if (glfwGetKey(window, GLFW_KEY_KP_1) == GLFW_PRESS) { rad -= 1; }
+        if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) 
+        { 
+            data.r_b -= 1; 
+            grid.create_cyl(data.r_b, data.h_b);
+        }
+        if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
+        {
+            data.r_b += 1;
+            grid.create_cyl(data.r_b, data.h_b);
+        }
+        if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
+        {
+            data.h_b -= 1;
+            grid.create_cyl(data.r_b, data.h_b);
+        }
+        if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS)
+        {
+            data.h_b += 1;
+            grid.create_cyl(data.r_b, data.h_b);
+        }
         
 
         data.x_t = x_t;
@@ -360,8 +385,8 @@ int main(void) {
         float t_2 = (GLfloat)glfwGetTime();
         
 
-        grid.bolean_cut();
-        //grid.create_draw_grid();
+        //grid.bolean_cut();
+        grid.create_draw_grid();
 
         float t_3 = (GLfloat)glfwGetTime();
         

@@ -22,7 +22,7 @@ void InitUI(GLFWwindow* window)
 	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 	ImGui::StyleColorsDark();
 
-	ImFont* font = io.Fonts->AddFontFromFileTTF("arial.ttf", 20.0f, NULL, io.Fonts->GetGlyphRangesCyrillic());
+	ImFont* font = io.Fonts->AddFontFromFileTTF("arial.ttf", 16.0f, NULL, io.Fonts->GetGlyphRangesCyrillic());
 	
 
 	// When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
