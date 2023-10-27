@@ -13,6 +13,7 @@ public:
     float cam_speed;
     float delta_time;
 
+   
     float r_b;
     float h_b;
 
@@ -32,7 +33,8 @@ public:
     std::vector<float> t4;
 
 
-
+    void set_autorun(bool autorun);
+    bool get_autorun();
     float get_delTime();
 
 };

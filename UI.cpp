@@ -9,7 +9,6 @@
 #include "implot.h"
 
 
-
 void InitUI(GLFWwindow* window)
 {
 	// Initialize ImGUI

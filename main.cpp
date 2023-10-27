@@ -47,6 +47,102 @@ int r = 5, h = 5;
 int r_t = 1, h_t = 1;
 
 
+string prog_0 = "G1 X0; G1 Y0; G1 Z0";
+
+/*
+std::vector<glm::vec3> G_code_run(Grid grid, string prog)
+{
+    string curret_command = "";
+
+    float x_new, y_new, z_new, a_new;
+    string x_new_s = "", y_new_s = "", z_new_s = "", a_new_s="";
+
+    int sym_num = 0;
+
+    std::vector<glm::vec3> coords;
+
+    while (sym_num < prog.size())
+    {
+        if (prog[sym_num] == 'G')
+        {
+            curret_command = "G" + prog[sym_num+1];
+            sym_num += 2;
+
+            while (sym_num < prog.size() || prog[sym_num] != ';')
+            {
+                if (prog[sym_num] == 'X')
+                {
+                    sym_num += 1;
+
+                    while (prog[sym_num] != ' ')
+                    {
+                        x_new_s += prog[sym_num];
+                        sym_num += 1;
+                    }
+                }
+                if (prog[sym_num] == 'Y')
+                {
+                    sym_num += 1;
+
+                    while (prog[sym_num] != ' ')
+                    {
+                        y_new_s += prog[sym_num];
+                        sym_num += 1;
+                    }
+                }
+                if (prog[sym_num] == 'Z')
+                {
+                    sym_num += 1;
+
+                    while (prog[sym_num] != ' ')
+                    {
+                        z_new_s += prog[sym_num];
+                        sym_num += 1;
+                    }
+                }
+                if (prog[sym_num] == 'A')
+                {
+                    sym_num += 1;
+
+                    while (prog[sym_num] != ' ')
+                    {
+                        a_new_s += prog[sym_num];
+                        sym_num += 1;
+                    }
+                }
+
+            }
+
+            x_new = std::stof(x_new_s);
+            y_new = std::stof(y_new_s);
+            z_new = std::stof(z_new_s);
+            a_new = std::stof(a_new_s);
+
+            float x_old = grid.x_tool;
+            float y_old = grid.y_tool;
+            float z_old = grid.z_tool;
+            float a_old = grid.a_tool;
+
+            float dx = abs(x_new - x_old);
+            float dy = abs(y_new - y_old);
+            float dz = abs(z_new - z_old);
+            float da_a = abs(a_new - a_old);
+
+            float d = min(dx, dy, dz);
+
+
+
+
+        }
+        sym_num += 1;
+
+    }
+    return coords;
+}
+*/
+
+
+
 
 std::vector<float> add_data_to_plot(std::vector<float> data, float new_data)
 {
@@ -99,6 +195,13 @@ struct Grid
     std::vector<int> voxel_id;
     std::vector<glm::vec3> grid_tool;
     std::vector<glm::vec3> grid_blank;
+
+    float x_tool;
+    float y_tool;
+    float z_tool;
+    float a_tool;
+
+
     float x_blank_min;
     float y_blank_min;
     float z_blank_min;
@@ -392,7 +495,8 @@ int main(void) {
 
 
     UI_Data data;
-    
+
+
     data.r_b = 40;
     data.h_b = 80;
     data.r_t = 25;
@@ -412,100 +516,142 @@ int main(void) {
     float rad = 5;
 
 
+
+
     while (!glfwWindowShouldClose(window)) {
 
         
+        if (false)
+        {
+            data.num_vert_b = grid.grid_blank.size();
+            data.num_vert_t = grid.grid_tool.size();
+            data.cam_yaw = camera.yaw;
+            data.cam_pitch = camera.pitch;
+
+            float t_1 = (GLfloat)glfwGetTime();
+
+            grid.create_tool(data.r_t, data.h_t, data.x_t, data.y_t, data.z_t, data.alfa);
+
+            float t_2 = (GLfloat)glfwGetTime();
+
+
+            grid.bolean_cut();
+
+
+            float t_3 = (GLfloat)glfwGetTime();
+
+
+            data.camPos = camera.cameraPos;
+            data.cam_speed = camera.cam_speed;
+            data.cam_pitch = camera.pitch;
+            data.cam_yaw = camera.yaw;
+
+            GLfloat currentFrame = (GLfloat)glfwGetTime();
+            deltaTime = currentFrame - lastFrame;
+            lastFrame = currentFrame;
+            data.delta_time = deltaTime;
+            display(window, glfwGetTime(), grid);
+            RenderUI(window, data);
+            camera.MoveCamera(window, deltaTime);
+            camera.UpdateMatrix(renderingProgram);
+            glfwSwapBuffers(window);
+            glfwPollEvents();
+            float t_0 = (GLfloat)glfwGetTime();
+
+            data.t1 = add_data_to_plot(data.t1, (t_2 - t_1));
+            data.t2 = add_data_to_plot(data.t2, (t_3 - t_2));
+            data.t3 = add_data_to_plot(data.t3, (t_0 - t_3));
+        }
+        else
+        {
+            if (glfwGetKey(window, GLFW_KEY_KP_6) == GLFW_PRESS) { data.x_t += 1; }
+            if (glfwGetKey(window, GLFW_KEY_KP_4) == GLFW_PRESS) { data.x_t -= 1; }
+            if (glfwGetKey(window, GLFW_KEY_KP_8) == GLFW_PRESS) { data.z_t -= 1; }
+            if (glfwGetKey(window, GLFW_KEY_KP_2) == GLFW_PRESS) { data.z_t += 1; }
+            if (glfwGetKey(window, GLFW_KEY_KP_7) == GLFW_PRESS) { data.y_t += 1; }
+            if (glfwGetKey(window, GLFW_KEY_KP_9) == GLFW_PRESS) { data.y_t -= 1; }
+            if (glfwGetKey(window, GLFW_KEY_KP_3) == GLFW_PRESS) { data.r_t += 1; }
+            if (glfwGetKey(window, GLFW_KEY_KP_1) == GLFW_PRESS) { data.r_t -= 1; }
+            if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
+            {
+                data.r_b -= 1;
+                grid.create_cyl(data.r_b, data.h_b);
+            }
+            if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
+            {
+                data.r_b += 1;
+                grid.create_cyl(data.r_b, data.h_b);
+            }
+            if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
+            {
+                data.h_b -= 1;
+                grid.create_cyl(data.r_b, data.h_b);
+            }
+            if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS)
+            {
+                data.h_b += 1;
+                grid.create_cyl(data.r_b, data.h_b);
+            }
+            if (glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS)
+            {
+                data.alfa += 0.01;
+            }
+            if (glfwGetKey(window, GLFW_KEY_6) == GLFW_PRESS)
+            {
+                data.alfa -= 0.01;
+            }
+            if (glfwGetKey(window, GLFW_KEY_7) == GLFW_PRESS)
+            {
+                data.h_t += 1;
+            }
+            if (glfwGetKey(window, GLFW_KEY_8) == GLFW_PRESS)
+            {
+                data.h_t -= 1;
+            }
+
+
+            data.num_vert_b = grid.grid_blank.size();
+            data.num_vert_t = grid.grid_tool.size();
+            data.cam_yaw = camera.yaw;
+            data.cam_pitch = camera.pitch;
+
+            float t_1 = (GLfloat)glfwGetTime();
+
+            grid.create_tool(data.r_t, data.h_t, data.x_t, data.y_t, data.z_t, data.alfa);
+            //grid.create_sphere(data.r_t, x_t, z_t, y_t);
+
+            float t_2 = (GLfloat)glfwGetTime();
+
+
+            grid.bolean_cut();
+            //grid.create_draw_grid();
+
+            float t_3 = (GLfloat)glfwGetTime();
+
+
+            data.camPos = camera.cameraPos;
+            data.cam_speed = camera.cam_speed;
+            data.cam_pitch = camera.pitch;
+            data.cam_yaw = camera.yaw;
+
+            GLfloat currentFrame = (GLfloat)glfwGetTime();
+            deltaTime = currentFrame - lastFrame;
+            lastFrame = currentFrame;
+            data.delta_time = deltaTime;
+            display(window, glfwGetTime(), grid);
+            RenderUI(window, data);
+            camera.MoveCamera(window, deltaTime);
+            camera.UpdateMatrix(renderingProgram);
+            glfwSwapBuffers(window);
+            glfwPollEvents();
+            float t_0 = (GLfloat)glfwGetTime();
+
+            //data.t0 = add_data_to_plot(data.t0, (t_1 - t_0));
+            data.t1 = add_data_to_plot(data.t1, (t_2 - t_1));
+            data.t2 = add_data_to_plot(data.t2, (t_3 - t_2));
+            data.t3 = add_data_to_plot(data.t3, (t_0 - t_3));
+        }
         
-
-        if (glfwGetKey(window, GLFW_KEY_KP_6) == GLFW_PRESS) { data.x_t += 1; }
-        if (glfwGetKey(window, GLFW_KEY_KP_4) == GLFW_PRESS) { data.x_t -= 1; }
-        if (glfwGetKey(window, GLFW_KEY_KP_8) == GLFW_PRESS) { data.z_t -= 1; }
-        if (glfwGetKey(window, GLFW_KEY_KP_2) == GLFW_PRESS) { data.z_t += 1; }
-        if (glfwGetKey(window, GLFW_KEY_KP_7) == GLFW_PRESS) { data.y_t += 1; }
-        if (glfwGetKey(window, GLFW_KEY_KP_9) == GLFW_PRESS) { data.y_t -= 1; }
-        if (glfwGetKey(window, GLFW_KEY_KP_3) == GLFW_PRESS) { data.r_t += 1; }
-        if (glfwGetKey(window, GLFW_KEY_KP_1) == GLFW_PRESS) { data.r_t -= 1; }
-        if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) 
-        { 
-            data.r_b -= 1; 
-            grid.create_cyl(data.r_b, data.h_b);
-        }
-        if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
-        {
-            data.r_b += 1;
-            grid.create_cyl(data.r_b, data.h_b);
-        }
-        if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
-        {
-            data.h_b -= 1;
-            grid.create_cyl(data.r_b, data.h_b);
-        }
-        if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS)
-        {
-            data.h_b += 1;
-            grid.create_cyl(data.r_b, data.h_b);
-        }
-        if (glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS)
-        {
-            data.alfa += 0.01;
-        }
-        if (glfwGetKey(window, GLFW_KEY_6) == GLFW_PRESS)
-        {
-            data.alfa -= 0.01;
-        }
-        if (glfwGetKey(window, GLFW_KEY_7) == GLFW_PRESS)
-        {
-            data.h_t += 1;
-        }
-        if (glfwGetKey(window, GLFW_KEY_8) == GLFW_PRESS)
-        {
-            data.h_t -= 1;
-        }
-        
-
-        data.num_vert_b = grid.grid_blank.size();
-        data.num_vert_t = grid.grid_tool.size();
-        data.cam_yaw = camera.yaw;
-        data.cam_pitch = camera.pitch;
-
-        float t_1 = (GLfloat)glfwGetTime();
-        
-        grid.create_tool(data.r_t, data.h_t, data.x_t, data.y_t, data.z_t, data.alfa);
-        //grid.create_sphere(data.r_t, x_t, z_t, y_t);
-
-        float t_2 = (GLfloat)glfwGetTime();
-        
-
-        grid.bolean_cut();
-        //grid.create_draw_grid();
-
-        float t_3 = (GLfloat)glfwGetTime();
-        
-
-        data.camPos = camera.cameraPos;
-        data.cam_speed = camera.cam_speed;
-        data.cam_pitch = camera.pitch;
-        data.cam_yaw = camera.yaw;
-
-        GLfloat currentFrame = (GLfloat)glfwGetTime();
-        deltaTime = currentFrame - lastFrame;
-        lastFrame = currentFrame;
-        data.delta_time = deltaTime;
-        display(window, glfwGetTime(), grid);
-        RenderUI(window, data);
-        camera.MoveCamera(window, deltaTime);
-        camera.UpdateMatrix(renderingProgram);
-        glfwSwapBuffers(window);
-        glfwPollEvents();
-        float t_0 = (GLfloat)glfwGetTime();
-
-        //data.t0 = add_data_to_plot(data.t0, (t_1 - t_0));
-        data.t1 = add_data_to_plot(data.t1, (t_2 - t_1));
-        data.t2 = add_data_to_plot(data.t2, (t_3 - t_2));
-        data.t3 = add_data_to_plot(data.t3, (t_0 - t_3));
-
-
-
     }
 
     ImGui::DestroyContext();
