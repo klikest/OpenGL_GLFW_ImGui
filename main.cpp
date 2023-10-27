@@ -174,6 +174,19 @@ bool scalar_cyl(float r, float x, float y)
     }
 }
 
+bool scalar_cyl_tool(float r, float x, float y)
+{
+    if ((x * x) + (y * y) <= (r * r) && (x * x) + (y * y) >= (r * r) - 0.1*(r * r))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
 
 bool scalar_sphere(float r, float x, float y, float z)
 {
@@ -223,6 +236,7 @@ struct Grid
                         {
                             grid_blank.push_back(glm::vec3(i, j, -k));
                         }
+
                      
                     }
             }
@@ -239,7 +253,7 @@ struct Grid
             {
                 for (int k = -r; k < r; k+=1)
                 {
-                    if (scalar_cyl(r, j, k))
+                    if (scalar_cyl_tool(r, j, k) ||( i==0 && scalar_cyl(r,j,k)) || (i == h-1 && scalar_cyl(r, j, k)))
                     {/*
                         float x_ = (cosf(alfa) * (i + dx) + sinf(alfa) * (k + dz));
                         float y_ = (j+dy);
@@ -498,14 +512,14 @@ int main(void) {
 
 
     data.r_b = 40;
-    data.h_b = 80;
-    data.r_t = 25;
+    data.h_b = 1;
+    data.r_t = 50;
 
     Grid grid;
     grid.create_cyl(data.r_b, data.h_b);
     
 
-    data.x_t = -40;
+    data.x_t = -100;
     data.y_t = 62;
     data.z_t = 10;
     data.alfa = 3.14/2;
