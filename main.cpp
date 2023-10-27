@@ -118,7 +118,7 @@ struct Grid
                     {
                         if (scalar_cyl(r, j, k))
                         {
-                            grid_blank.push_back(glm::vec3(i * 2, j * 2, -k * 2));
+                            grid_blank.push_back(glm::vec3(i, j, -k));
                         }
                      
                     }
@@ -137,10 +137,14 @@ struct Grid
                 for (int k = -r; k < r; k+=1)
                 {
                     if (scalar_cyl(r, j, k))
-                    {
-                        float x_ = 2*(cosf(alfa) * (i + dx) + sinf(alfa) * (k + dz));
-                        float y_ = 2*(j+dy);
-                        float z_ = 2*(-sinf(alfa) * (i + dx) + cosf(alfa) * (k + dz));
+                    {/*
+                        float x_ = (cosf(alfa) * (i + dx) + sinf(alfa) * (k + dz));
+                        float y_ = (j+dy);
+                        float z_ = (-sinf(alfa) * (i + dx) + cosf(alfa) * (k + dz));
+                        grid_tool.push_back(glm::vec3(round(x_), round(y_), round(z_)));*/
+                        float x_ = dx + (cosf(alfa) * (i) + sinf(alfa) * (k));
+                        float y_ = (j + dy);
+                        float z_ = dz + (-sinf(alfa) * (i) + cosf(alfa) * (k));
                         grid_tool.push_back(glm::vec3(round(x_), round(y_), round(z_)));
                     }
 
@@ -266,18 +270,18 @@ struct Grid
 void setupVertices(void) {
     // 12 triangles * 3 vertices * 3 values (x, y, z)
     float vertexPositions[108] = {
-        -1.0f,  1.0f, -1.0f, -1.0f, -1.0f, -1.0f,  1.0f, -1.0f, -1.0f,
-         1.0f, -1.0f, -1.0f,  1.0f,  1.0f, -1.0f, -1.0f,  1.0f, -1.0f,
-         1.0f, -1.0f, -1.0f,  1.0f, -1.0f,  1.0f,  1.0f,  1.0f, -1.0f,
-         1.0f, -1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  1.0f, -1.0f,
-         1.0f, -1.0f,  1.0f, -1.0f, -1.0f,  1.0f,  1.0f,  1.0f,  1.0f,
-        -1.0f, -1.0f,  1.0f, -1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  1.0f,
-        -1.0f, -1.0f,  1.0f, -1.0f, -1.0f, -1.0f, -1.0f,  1.0f,  1.0f,
-        -1.0f, -1.0f, -1.0f, -1.0f,  1.0f, -1.0f, -1.0f,  1.0f,  1.0f,
-        -1.0f, -1.0f,  1.0f,  1.0f, -1.0f,  1.0f,  1.0f, -1.0f, -1.0f,
-         1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f,  1.0f,
-        -1.0f,  1.0f, -1.0f,  1.0f,  1.0f, -1.0f,  1.0f,  1.0f,  1.0f,
-         1.0f,  1.0f,  1.0f, -1.0f,  1.0f,  1.0f, -1.0f,  1.0f, -1.0f,
+        -0.5f,  0.5f, -0.5f, -0.5f, -0.5f, -0.5f,  0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,  0.5f,  0.5f, -0.5f, -0.5f,  0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,  0.5f, -0.5f,  0.5f,  0.5f,  0.5f, -0.5f,
+         0.5f, -0.5f,  0.5f,  0.5f,  0.5f,  0.5f,  0.5f,  0.5f, -0.5f,
+         0.5f, -0.5f,  0.5f, -0.5f, -0.5f,  0.5f,  0.5f,  0.5f,  0.5f,
+        -0.5f, -0.5f,  0.5f, -0.5f,  0.5f,  0.5f,  0.5f,  0.5f,  0.5f,
+        -0.5f, -0.5f,  0.5f, -0.5f, -0.5f, -0.5f, -0.5f,  0.5f,  0.5f,
+        -0.5f, -0.5f, -0.5f, -0.5f,  0.5f, -0.5f, -0.5f,  0.5f,  0.5f,
+        -0.5f, -0.5f,  0.5f,  0.5f, -0.5f,  0.5f,  0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f, -0.5f, -0.5f, -0.5f, -0.5f, -0.5f,  0.5f,
+        -0.5f,  0.5f, -0.5f,  0.5f,  0.5f, -0.5f,  0.5f,  0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f, -0.5f,  0.5f,  0.5f, -0.5f,  0.5f, -0.5f,
     };
 
     
@@ -380,14 +384,15 @@ int main(void) {
     init(window);
     InitUI(window);
     
-    Camera camera(window, glm::vec3(-10.0f, 10.0f, 20.0f));
+    Camera camera(window, glm::vec3(-10.0f, 10.0f, 20.0f), -62, -25);
 
 
-    camera.cameraPos = glm::vec3(-10, 10, 200);
+    camera.cameraPos = glm::vec3(-64, 92, 100);
+    camera.cam_speed = 100;
 
 
     UI_Data data;
-    camera.cam_speed = 100;
+    
     data.r_b = 40;
     data.h_b = 80;
     data.r_t = 25;
@@ -396,9 +401,9 @@ int main(void) {
     grid.create_cyl(data.r_b, data.h_b);
     
 
-    data.x_t = -12;
-    data.y_t = 54;
-    data.z_t = -50;
+    data.x_t = -40;
+    data.y_t = 62;
+    data.z_t = 10;
     data.alfa = 3.14/2;
     data.h_t = 20;
     
@@ -414,8 +419,8 @@ int main(void) {
 
         if (glfwGetKey(window, GLFW_KEY_KP_6) == GLFW_PRESS) { data.x_t += 1; }
         if (glfwGetKey(window, GLFW_KEY_KP_4) == GLFW_PRESS) { data.x_t -= 1; }
-        if (glfwGetKey(window, GLFW_KEY_KP_8) == GLFW_PRESS) { data.z_t += 1; }
-        if (glfwGetKey(window, GLFW_KEY_KP_2) == GLFW_PRESS) { data.z_t -= 1; }
+        if (glfwGetKey(window, GLFW_KEY_KP_8) == GLFW_PRESS) { data.z_t -= 1; }
+        if (glfwGetKey(window, GLFW_KEY_KP_2) == GLFW_PRESS) { data.z_t += 1; }
         if (glfwGetKey(window, GLFW_KEY_KP_7) == GLFW_PRESS) { data.y_t += 1; }
         if (glfwGetKey(window, GLFW_KEY_KP_9) == GLFW_PRESS) { data.y_t -= 1; }
         if (glfwGetKey(window, GLFW_KEY_KP_3) == GLFW_PRESS) { data.r_t += 1; }
@@ -442,11 +447,11 @@ int main(void) {
         }
         if (glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS)
         {
-            data.alfa += 0.05;
+            data.alfa += 0.01;
         }
         if (glfwGetKey(window, GLFW_KEY_6) == GLFW_PRESS)
         {
-            data.alfa -= 0.05;
+            data.alfa -= 0.01;
         }
         if (glfwGetKey(window, GLFW_KEY_7) == GLFW_PRESS)
         {
@@ -460,7 +465,8 @@ int main(void) {
 
         data.num_vert_b = grid.grid_blank.size();
         data.num_vert_t = grid.grid_tool.size();
-
+        data.cam_yaw = camera.yaw;
+        data.cam_pitch = camera.pitch;
 
         float t_1 = (GLfloat)glfwGetTime();
         

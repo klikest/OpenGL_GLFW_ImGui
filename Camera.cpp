@@ -13,11 +13,26 @@
 
 
 
-    Camera::Camera(GLFWwindow* window, glm::vec3 campos_)
+    Camera::Camera(GLFWwindow* window, glm::vec3 campos_, float yaw_, float pitch_)
     {
         cameraPos = campos_;
         glfwGetFramebufferSize(window, &width, &height);
         float aspect = (float)width / (float)height;
+
+        yaw = yaw_;
+        pitch = pitch_;
+        // Make sure that when pitch is out of bounds, screen doesn't get flipped
+        if (pitch > 89.0f)
+            pitch = 89.0f;
+        if (pitch < -89.0f)
+            pitch = -89.0f;
+
+        glm::vec3 front;
+        front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+        front.y = sin(glm::radians(pitch));
+        front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+        cameraFront = glm::normalize(front);
+
 
         pMat = glm::perspective(1.0472f, aspect, 0.1f, 1000.0f); // 1.0472 radians == 60 degrees
         vMat = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
