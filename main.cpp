@@ -20,6 +20,7 @@
 #include "Camera.h"
 #include "UI.h"
 #include "UI_Data.h"
+#include "Grid.h"
 
 using namespace std;
 
@@ -162,226 +163,9 @@ std::vector<float> add_data_to_plot(std::vector<float> data, float new_data)
 
 
 
-bool scalar_cyl(float r, float x, float y)
-{
-    if ((x * x) + (y * y) < (r * r))
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-bool scalar_cyl_tool(float r, float x, float y)
-{
-    if ((x * x) + (y * y) <= (r * r) && (x * x) + (y * y) >= (r * r) - 0.1*(r * r))
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
 
 
 
-bool scalar_sphere(float r, float x, float y, float z)
-{
-    if ((x * x) + (y * y) + (z * z) > (r * r)-0.2*(r * r) && (x * x) + (y * y) + (z * z) < (r * r))
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-
-struct Grid
-{
-    std::vector<glm::vec3> grid;
-    std::vector<glm::vec3> grid_draw;
-    std::vector<int> voxel_id;
-    std::vector<glm::vec3> grid_tool;
-    std::vector<glm::vec3> grid_blank;
-
-    float x_tool;
-    float y_tool;
-    float z_tool;
-    float a_tool;
-
-
-    float x_blank_min;
-    float y_blank_min;
-    float z_blank_min;
-    float x_blank_max;
-    float y_blank_max;
-    float z_blank_max;
-
-
-    void create_cyl(int r, int h)
-    {
-        grid_blank.clear();
-        for (int i = 0; i < h; i++)
-        {
-            for (int j = -r; j < r; j++)
-            {
-                    for (int k =-r; k < r; k++)
-                    {
-                        if (scalar_cyl(r, j, k))
-                        {
-                            grid_blank.push_back(glm::vec3(i, j, -k));
-                        }
-
-                     
-                    }
-            }
-        }
-
-    }
-
-    void create_tool(int r, int h, float dx, float dy, float dz, float alfa)
-    {
-        grid_tool.clear();
-        for (int i = 0; i < h; i+=1)
-        {
-            for (int j = -r; j < r; j+=1)
-            {
-                for (int k = -r; k < r; k+=1)
-                {
-                    if (scalar_cyl_tool(r, j, k) ||( i==0 && scalar_cyl(r,j,k)) || (i == h-1 && scalar_cyl(r, j, k)))
-                    {/*
-                        float x_ = (cosf(alfa) * (i + dx) + sinf(alfa) * (k + dz));
-                        float y_ = (j+dy);
-                        float z_ = (-sinf(alfa) * (i + dx) + cosf(alfa) * (k + dz));
-                        grid_tool.push_back(glm::vec3(round(x_), round(y_), round(z_)));*/
-                        float x_ = dx + (cosf(alfa) * (i) + sinf(alfa) * (k));
-                        float y_ = (j + dy);
-                        float z_ = dz + (-sinf(alfa) * (i) + cosf(alfa) * (k));
-                        grid_tool.push_back(glm::vec3(round(x_), round(y_), round(z_)));
-                    }
-
-                }
-            }
-        }
-
-    }
-
-
-
-    void create_sphere(int r, float dx, float dy, float dz)
-    {
-        grid_tool.clear();
-        for (int i = -r; i < r; i++)
-        {
-            for (int j = -r; j < r; j++)
-            {
-                for (int k = -r; k < r; k++)
-                {
-                    if (scalar_sphere(r, i, j, k))
-                    {
-                        grid_tool.push_back(glm::vec3(i * 2 + dx, j * 2 + dy, -k * 2 + dz));
-                    }
-                    else
-                    {
-
-                    }
-
-                }
-
-            }
-        }
-
-    }
-
-    void bolean_cut()
-    {
-        float t_x_min = grid_tool[0].x, t_x_max = grid_tool[0].x, t_y_min = grid_tool[0].y, t_y_max = grid_tool[0].y, t_z_min = grid_tool[0].z, t_z_max = grid_tool[0].z;
-        float b_x_min = grid_blank[0].x, b_x_max = grid_blank[0].x, b_y_min = grid_blank[0].y, b_y_max = grid_blank[0].y, b_z_min = grid_blank[0].z, b_z_max = grid_blank[0].z;
-
-        for (int i = 0; i < grid_tool.size(); i++)
-        {
-            float new_x = grid_tool[i].x;
-            float new_y = grid_tool[i].y;
-            float new_z = grid_tool[i].z;
-            if (new_x > t_x_max) { t_x_max = new_x; }
-            if (new_x < t_x_min) { t_x_min = new_x; }
-            if (new_y > t_y_max) { t_y_max = new_y; }
-            if (new_y < t_y_min) { t_y_min = new_y; }
-            if (new_z > t_z_max) { t_z_max = new_z; }
-            if (new_z < t_z_min) { t_z_min = new_z; }
-        }
-        for (int i = 0; i < grid_blank.size(); i++)
-        {
-            float new_x = grid_blank[i].x;
-            float new_y = grid_blank[i].y;
-            float new_z = grid_blank[i].z;
-            if (new_x > b_x_max) { b_x_max = new_x; }
-            if (new_x < b_x_min) { b_x_min = new_x; }
-            if (new_y > b_y_max) { b_y_max = new_y; }
-            if (new_y < b_y_min) { b_y_min = new_y; }
-            if (new_z > b_z_max) { b_z_max = new_z; }
-            if (new_z < b_z_min) { b_z_min = new_z; }
-        }
-
-
-        grid_draw.clear();
-
-
-        for (int i = 0; i < grid_blank.size(); i++)
-        {
-            if (!(grid_blank[i].x > t_x_max || grid_blank[i].x < t_x_min || grid_blank[i].y > t_y_max || grid_blank[i].y < t_y_min || grid_blank[i].z > t_z_max || grid_blank[i].z < t_z_min))
-            {
-                for (int j = 0; j < grid_tool.size(); j++)
-                {
-                    if (!(grid_tool[j].x > b_x_max || grid_tool[j].x < b_x_min || grid_tool[j].y > b_y_max || grid_tool[j].y < b_y_min || grid_tool[j].z > b_z_max || grid_tool[j].z < b_z_min))
-                    {
-
-                        if (grid_tool[j].x == grid_blank[i].x && grid_tool[j].y == grid_blank[i].y && grid_tool[j].z == grid_blank[i].z)
-                        {
-                            grid_blank.erase(std::remove(grid_blank.begin(), grid_blank.end(), grid_blank[i]), grid_blank.end());
-                        }
-                    }
-                }         
-                      
-            }
-            
-        }
-
-        for (int i = 0; i < grid_blank.size(); i++)
-        {
-            grid_draw.push_back(grid_blank[i]);
-        }
-
-        for (int j = 0; j < grid_tool.size(); j++)
-        {
-            grid_draw.push_back(grid_tool[j]);
-        }
-
-    }
-
-
-    void create_draw_grid()
-    {
-        grid_draw.clear();
-        for (int i = 0; i < grid_blank.size(); i++)
-        {
-            grid_draw.push_back(grid_blank[i]);
-        }
-
-        for (int j = 0; j < grid_tool.size(); j++)
-        {
-            grid_draw.push_back(grid_tool[j]);
-        }
-    }
-
-
-
-};
 
 
 void setupVertices(void) {
@@ -491,7 +275,7 @@ int main(void) {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     //glfwSwapInterval(1);
-    GLFWwindow* window = glfwCreateWindow(800, 600, "Voxel Engine", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(900, 600, "Voxel Engine", nullptr, nullptr);
     glfwMakeContextCurrent(window);
     if (glewInit() != GLEW_OK) { exit(EXIT_FAILURE); }
 
@@ -525,18 +309,39 @@ int main(void) {
     data.alfa = 3.14/2;
     data.h_t = 20;
     
-    grid.create_tool(data.r_t, 10, data.x_t, data.y_t, data.z_t, data.alfa);
+    grid.create_tool(data.r_t, 10, data.x_t, data.y_t, data.z_t, data.alfa, 0, 0);
 
     float rad = 5;
 
+    int steps_prog = 0;
+
+    std::vector<glm::vec3> coords_tool;
+    std::vector<glm::vec3> angles_tool;
+
+    for (int i = 0; i < 100; i++)
+    {
+        float x_min = -50;
+        float x_max = 10;
+        float alfa_min = 0;
+        float alfa_max = 3.14;
+        
+        float dx = (x_max - x_min) / 100;
+        float dalfa = (alfa_max - alfa_min) / 100;
 
 
+
+        coords_tool.push_back(glm::vec3(-100 + i*dx, 0, 0));
+        angles_tool.push_back(glm::vec3(i*dalfa, 0, 0));
+    }
 
     while (!glfwWindowShouldClose(window)) {
 
+        data.G_code = get_G_code_bool();
         
-        if (false)
+        if (data.G_code)
         {
+            while (steps_prog < coords_tool.size())
+            {
             data.num_vert_b = grid.grid_blank.size();
             data.num_vert_t = grid.grid_tool.size();
             data.cam_yaw = camera.yaw;
@@ -544,7 +349,8 @@ int main(void) {
 
             float t_1 = (GLfloat)glfwGetTime();
 
-            grid.create_tool(data.r_t, data.h_t, data.x_t, data.y_t, data.z_t, data.alfa);
+            grid.create_tool(data.r_t, data.h_t, coords_tool[steps_prog].x, coords_tool[steps_prog].y, coords_tool[steps_prog].z, angles_tool[steps_prog].x, 0, 0);
+            steps_prog += 1;
 
             float t_2 = (GLfloat)glfwGetTime();
 
@@ -575,54 +381,24 @@ int main(void) {
             data.t1 = add_data_to_plot(data.t1, (t_2 - t_1));
             data.t2 = add_data_to_plot(data.t2, (t_3 - t_2));
             data.t3 = add_data_to_plot(data.t3, (t_0 - t_3));
+            }
+
+            steps_prog = 0;
+         
+
         }
         else
         {
-            if (glfwGetKey(window, GLFW_KEY_KP_6) == GLFW_PRESS) { data.x_t += 1; }
-            if (glfwGetKey(window, GLFW_KEY_KP_4) == GLFW_PRESS) { data.x_t -= 1; }
-            if (glfwGetKey(window, GLFW_KEY_KP_8) == GLFW_PRESS) { data.z_t -= 1; }
-            if (glfwGetKey(window, GLFW_KEY_KP_2) == GLFW_PRESS) { data.z_t += 1; }
-            if (glfwGetKey(window, GLFW_KEY_KP_7) == GLFW_PRESS) { data.y_t += 1; }
-            if (glfwGetKey(window, GLFW_KEY_KP_9) == GLFW_PRESS) { data.y_t -= 1; }
-            if (glfwGetKey(window, GLFW_KEY_KP_3) == GLFW_PRESS) { data.r_t += 1; }
-            if (glfwGetKey(window, GLFW_KEY_KP_1) == GLFW_PRESS) { data.r_t -= 1; }
-            if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
-            {
-                data.r_b -= 1;
-                grid.create_cyl(data.r_b, data.h_b);
-            }
-            if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
-            {
-                data.r_b += 1;
-                grid.create_cyl(data.r_b, data.h_b);
-            }
-            if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
-            {
-                data.h_b -= 1;
-                grid.create_cyl(data.r_b, data.h_b);
-            }
-            if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS)
-            {
-                data.h_b += 1;
-                grid.create_cyl(data.r_b, data.h_b);
-            }
-            if (glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS)
-            {
-                data.alfa += 0.01;
-            }
-            if (glfwGetKey(window, GLFW_KEY_6) == GLFW_PRESS)
-            {
-                data.alfa -= 0.01;
-            }
-            if (glfwGetKey(window, GLFW_KEY_7) == GLFW_PRESS)
-            {
-                data.h_t += 1;
-            }
-            if (glfwGetKey(window, GLFW_KEY_8) == GLFW_PRESS)
-            {
-                data.h_t -= 1;
-            }
 
+            data.x_t = get_coord_tool().x;
+            data.y_t = get_coord_tool().y;
+            data.z_t = get_coord_tool().z;
+
+            data.x_a_t = get_angle_tool().x;
+            data.y_a_t = get_angle_tool().y;
+            data.z_a_t = get_angle_tool().z;
+
+            //data.get_inputs(window, grid);
 
             data.num_vert_b = grid.grid_blank.size();
             data.num_vert_t = grid.grid_tool.size();
@@ -631,8 +407,8 @@ int main(void) {
 
             float t_1 = (GLfloat)glfwGetTime();
 
-            grid.create_tool(data.r_t, data.h_t, data.x_t, data.y_t, data.z_t, data.alfa);
-            //grid.create_sphere(data.r_t, x_t, z_t, y_t);
+            grid.create_tool(data.r_t, data.h_t, data.x_t, data.y_t, data.z_t, data.x_a_t, data.y_a_t, data.z_a_t);
+
 
             float t_2 = (GLfloat)glfwGetTime();
 
