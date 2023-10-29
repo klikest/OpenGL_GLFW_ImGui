@@ -80,7 +80,7 @@ bool scalar_cyl(float r, float x, float y)
 
 bool scalar_sphere(float r, float x, float y, float z)
 {
-    if ((x * x) + (y * y) + (z * z) > (r * r)-0.1*(r * r) && (x * x) + (y * y) + (z * z) < (r * r))
+    if ((x * x) + (y * y) + (z * z) > (r * r)-0.4*(r*r) && (x * x) + (y * y) + (z * z) < (r * r))
     {
         return true;
     }
