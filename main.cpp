@@ -24,13 +24,13 @@
 
 using namespace std;
 
-#define numVAOs 1
-#define numVBOs 3
+#define numVAOs 2
+#define numVBOs 5
 
 //Utils util = Utils();
 float cameraX, cameraY, cameraZ;
 float cubeLocX, cubeLocY, cubeLocZ;
-GLuint renderingProgram;
+GLuint renderingProgram, renderingProgram_coords;
 GLuint vao[numVAOs];
 GLuint vbo[numVBOs];
 
@@ -200,7 +200,7 @@ void setupVertices(void) {
     Grid grid;
     //grid.create_cyl(r, h);
     //grid.create_sphere(10, 100, 0, 0);
-    glGenVertexArrays(1, vao);  // creates VAO and returns the integer ID
+    glGenVertexArrays(2, vao);  // creates VAO and returns the integer ID
     glBindVertexArray(vao[0]);
     glGenBuffers(numVBOs, vbo);  // creates VBO and returns the integer ID
     glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
@@ -223,11 +223,76 @@ void setupVertices(void) {
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(int), (void*)0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    float l = 60;
+    float dl = l / 30;
+    float d = l - dl;
+    
+
+    float line[] = {
+    0.0, 0.0, 0.0,
+    l, 0.0, 0.0,
+    l, 0.0, 0.0,
+    d, 0.0, dl,
+    l, 0.0, 0.0,
+    d, 0.0, -dl,
+
+    0.0, 0.0, 0.0,
+    0.0, l, 0.0,
+    0.0, l, 0.0,
+    0.0, d, dl,
+    0.0, l, 0.0,
+    0.0, d, -dl,
+
+    0.0, 0.0, 0.0,
+    0.0, 0.0, l,
+    0.0, 0.0, l,
+    0.0, dl, d,
+    0.0, 0.0, l,
+    0.0, -dl, d
+    };
+    float color[] = {
+    1.0, 0.0, 0.0,
+    1.0, 0.0, 0.0,
+    1.0, 0.0, 0.0,
+    1.0, 0.0, 0.0,
+    1.0, 0.0, 0.0,
+    1.0, 0.0, 0.0,
+
+    0.0, 1.0, 0.0,
+    0.0, 1.0, 0.0,
+    0.0, 1.0, 0.0,
+    0.0, 1.0, 0.0,
+    0.0, 1.0, 0.0,
+    0.0, 1.0, 0.0,
+
+    0.0, 0.0, 1.0,
+    0.0, 0.0, 1.0,
+    0.0, 0.0, 1.0,
+    0.0, 0.0, 1.0,
+    0.0, 0.0, 1.0,
+    0.0, 0.0, 1.0
+    };
+
+     // creates VAO and returns the integer ID
+    glBindVertexArray(vao[1]);
+    glEnableVertexAttribArray(0);// creates VBO and returns the integer ID
+    glBindBuffer(GL_ARRAY_BUFFER, vbo[3]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(line), line, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+    glEnableVertexAttribArray(1);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(color), color, GL_STATIC_DRAW);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+
 }
 
 // once
 void init(GLFWwindow* window) {
     renderingProgram = createShaderProgram((char*)"vert_shader.glsl", (char*)"frag_shader.glsl");
+    renderingProgram_coords = createShaderProgram((char*)"coords_vert.glsl", (char*)"coords_frag.glsl");
 
     setupVertices();
 
@@ -275,6 +340,22 @@ void display(GLFWwindow* window, double currentTime, Grid grid) {
     glCullFace(GL_FRONT);
     
     glDrawArraysInstanced(GL_TRIANGLES, 0, 36, grid.grid_draw.size());
+
+
+    
+    glUseProgram(renderingProgram_coords);
+    glEnableVertexAttribArray(0);// creates VBO and returns the integer ID
+    glBindBuffer(GL_ARRAY_BUFFER, vbo[3]);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+    glEnableVertexAttribArray(1);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+    glEnable(GL_LINE_SMOOTH);
+    glDrawArrays(GL_LINES, 0, 6*3);
+    
+
 }
 
 
@@ -384,7 +465,7 @@ int main(void) {
             display(window, glfwGetTime(), grid);
             RenderUI(window, data);
             camera.MoveCamera(window, deltaTime);
-            camera.UpdateMatrix(renderingProgram);
+            camera.UpdateMatrix(renderingProgram, renderingProgram_coords);
             glfwSwapBuffers(window);
             glfwPollEvents();
             float t_0 = (GLfloat)glfwGetTime();
@@ -442,7 +523,7 @@ int main(void) {
             display(window, glfwGetTime(), grid);
             RenderUI(window, data);
             camera.MoveCamera(window, deltaTime);
-            camera.UpdateMatrix(renderingProgram);
+            camera.UpdateMatrix(renderingProgram, renderingProgram_coords);
             glfwSwapBuffers(window);
             glfwPollEvents();
             float t_0 = (GLfloat)glfwGetTime();

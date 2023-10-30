@@ -118,12 +118,20 @@
 
     }
 
-    void Camera::UpdateMatrix(GLuint shader)
+    void Camera::UpdateMatrix(GLuint shader, GLuint shader_coords)
     {
         glUseProgram(shader);
 
         vLoc = glGetUniformLocation(shader, "v_matrix");
         projLoc = glGetUniformLocation(shader, "proj_matrix");
+
+        glUniformMatrix4fv(vLoc, 1, GL_FALSE, glm::value_ptr(vMat));
+        glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(pMat));
+
+        glUseProgram(shader_coords);
+
+        vLoc = glGetUniformLocation(shader_coords, "mv_matrix");
+        projLoc = glGetUniformLocation(shader_coords, "proj_matrix");
 
         glUniformMatrix4fv(vLoc, 1, GL_FALSE, glm::value_ptr(vMat));
         glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(pMat));

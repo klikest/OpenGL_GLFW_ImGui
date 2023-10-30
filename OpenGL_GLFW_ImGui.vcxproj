@@ -180,6 +180,8 @@
     <ClInclude Include="Utils.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="coords_frag.glsl" />
+    <None Include="coords_vert.glsl" />
     <None Include="frag_shader.glsl" />
     <None Include="vert_shader.glsl" />
   </ItemGroup>
