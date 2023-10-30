@@ -1,6 +1,6 @@
 #pragma once
-#include <GL\glew.h>
-#include <GLFW\glfw3.h>
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 #include <iostream>
 #include <stdio.h>
 #include <string>
@@ -33,7 +33,7 @@ public:
 
     GLuint vLoc = 0, projLoc = 0;
 
-    Camera(GLFWwindow* window, glm::vec3 campos_);
+    Camera(GLFWwindow* window, glm::vec3 campos_, float yaw_, float pitch);
     void MoveCamera(GLFWwindow* window, GLfloat deltaTime);
     void UpdateMatrix(GLuint shader);
 
