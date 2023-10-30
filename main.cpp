@@ -318,7 +318,7 @@ void display(GLFWwindow* window, double currentTime, Grid grid) {
     glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * grid.grid_draw.size(), grid.grid_draw.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * grid.grid_draw.size(), grid.grid_draw.data(), GL_DYNAMIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glEnableVertexAttribArray(1);
@@ -329,7 +329,7 @@ void display(GLFWwindow* window, double currentTime, Grid grid) {
 
     glEnableVertexAttribArray(2);
     glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(int) * grid.voxel_id.size(), grid.voxel_id.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(int) * grid.voxel_id.size(), grid.voxel_id.data(), GL_DYNAMIC_DRAW);
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(int), (void*)0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -389,7 +389,7 @@ int main(void) {
 
     data.r_b = 40;
     data.h_b = 1;
-    data.r_t = 50;
+    data.r_t = 51;
 
     Grid grid;
     grid.create_cyl(data.r_b, data.h_b);
@@ -410,20 +410,20 @@ int main(void) {
     std::vector<glm::vec3> coords_tool;
     std::vector<glm::vec3> angles_tool;
 
-    for (int i = 0; i < 100; i++)
+    for (int i = 0; i < 150; i++)
     {
         float x_min = -50;
-        float x_max = 10;
+        float x_max = 100;
         float alfa_min = 0;
-        float alfa_max = 3.14;
+        float alfa_max = 130;
         
         float dx = (x_max - x_min) / 100;
         float dalfa = (alfa_max - alfa_min) / 100;
 
 
 
-        coords_tool.push_back(glm::vec3(-100 + i*dx, 0, 0));
-        angles_tool.push_back(glm::vec3(i*dalfa, 0, 0));
+        coords_tool.push_back(glm::vec3(-100 + i*dx, 0, -45));
+        angles_tool.push_back(glm::vec3(90 , i*dx, 0));
     }
 
     while (!glfwWindowShouldClose(window)) {
@@ -432,6 +432,8 @@ int main(void) {
         
         if (data.G_code)
         {
+            grid.create_cyl(data.r_b, data.h_b);
+
             while (steps_prog < coords_tool.size())
             {
             data.num_vert_b = grid.grid_blank.size();
@@ -441,7 +443,7 @@ int main(void) {
 
             float t_1 = (GLfloat)glfwGetTime();
 
-            grid.create_tool(data.r_t, data.h_t, coords_tool[steps_prog].x, coords_tool[steps_prog].y, coords_tool[steps_prog].z, angles_tool[steps_prog].x, 0, 0);
+            grid.create_tool(data.r_t, data.h_t, coords_tool[steps_prog].x, coords_tool[steps_prog].y, coords_tool[steps_prog].z, angles_tool[steps_prog].x, angles_tool[steps_prog].y, angles_tool[steps_prog].z);
             steps_prog += 1;
 
             float t_2 = (GLfloat)glfwGetTime();
@@ -476,7 +478,7 @@ int main(void) {
             }
 
             steps_prog = 0;
-         
+            
 
         }
         else

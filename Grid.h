@@ -19,6 +19,7 @@ public:
     std::vector<int> voxel_id;
     std::vector<glm::vec3> grid_tool;
     std::vector<glm::vec3> grid_blank;
+    std::vector<glm::vec3> tmp_vec;
 
     float x_tool=0;
     float y_tool;

@@ -82,7 +82,7 @@ void Grid::create_tool(int r, int h, float dx, float dy, float dz, float x_a, fl
         {
             for (int k = -r; k < r; k += 1)
             {
-                if (scalar_cyl_tool(r, j, k) || (i == 0 && scalar_cyl(r, j, k)) || (i == 1 && scalar_cyl(r, j, k)) || (i == h - 1 && scalar_cyl(r, j, k)) || (i == h - 2 && scalar_cyl(r, j, k)))
+                if (scalar_cyl_tool(r, j, k) || (i == 0 && scalar_cyl(r, j, k)) || (i == 1 && scalar_cyl(r, j, k)) || (i == 2 && scalar_cyl(r, j, k)) || (i == h - 1 && scalar_cyl(r, j, k)) || (i == h - 2 && scalar_cyl(r, j, k)) || (i == h - 3 && scalar_cyl(r, j, k)))
                 {
                     glm::mat4 trans_y = glm::mat4(1.0f);
                     trans_y = glm::rotate(trans_y, glm::radians(x_a), glm::vec3(0.0, 1.0, 0.0));
@@ -165,9 +165,11 @@ void Grid::bolean_cut()
 
     grid_draw.clear();
 
+    tmp_vec.clear();
 
     for (int i = 0; i < grid_blank.size(); i++)
     {
+        bool is_void = true;
         if (!(grid_blank[i].x > t_x_max || grid_blank[i].x < t_x_min || grid_blank[i].y > t_y_max || grid_blank[i].y < t_y_min || grid_blank[i].z > t_z_max || grid_blank[i].z < t_z_min))
         {
             for (int j = 0; j < grid_tool.size(); j++)
@@ -175,17 +177,25 @@ void Grid::bolean_cut()
                 if (!(grid_tool[j].x > b_x_max || grid_tool[j].x < b_x_min || grid_tool[j].y > b_y_max || grid_tool[j].y < b_y_min || grid_tool[j].z > b_z_max || grid_tool[j].z < b_z_min))
                 {
 
-                    if (grid_tool[j].x == grid_blank[i].x && grid_tool[j].y == grid_blank[i].y && grid_tool[j].z == grid_blank[i].z)
+                    if ((is_void == false) || grid_tool[j] == grid_blank[i])
                     {
-                        grid_blank.erase(std::remove(grid_blank.begin(), grid_blank.end(), grid_blank[i]), grid_blank.end());
+                        //grid_blank.erase(std::remove(grid_blank.begin(), grid_blank.end(), grid_blank[i]), grid_blank.end());
+                        is_void = false;
                     }
                 }
             }
 
         }
+        if (is_void)
+        {
+            tmp_vec.push_back(grid_blank[i]);
+        }
 
     }
 
+    grid_blank.clear();
+    grid_blank = tmp_vec;
+    
     for (int i = 0; i < grid_blank.size(); i++)
     {
         grid_draw.push_back(grid_blank[i]);
