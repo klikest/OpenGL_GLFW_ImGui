@@ -16,11 +16,14 @@
 #include"imgui_impl_glfw.h"
 #include"imgui_impl_opengl3.h"
 
+#include <CL/cl.h>
+
 #include "Utils.h"
 #include "Camera.h"
 #include "UI.h"
 #include "UI_Data.h"
 #include "Grid.h"
+#include "Grid3D.h"
 
 using namespace std;
 
@@ -181,7 +184,7 @@ std::vector<float> add_data_to_plot(std::vector<float> data, float new_data)
 
 void setupVertices(void) {
     // 12 triangles * 3 vertices * 3 values (x, y, z)
-    float vertexPositions[108] = {
+    /*float vertexPositions[108] = {
         -0.5f,  0.5f, -0.5f, -0.5f, -0.5f, -0.5f,  0.5f, -0.5f, -0.5f,
          0.5f, -0.5f, -0.5f,  0.5f,  0.5f, -0.5f, -0.5f,  0.5f, -0.5f,
          0.5f, -0.5f, -0.5f,  0.5f, -0.5f,  0.5f,  0.5f,  0.5f, -0.5f,
@@ -194,35 +197,43 @@ void setupVertices(void) {
          0.5f, -0.5f, -0.5f, -0.5f, -0.5f, -0.5f, -0.5f, -0.5f,  0.5f,
         -0.5f,  0.5f, -0.5f,  0.5f,  0.5f, -0.5f,  0.5f,  0.5f,  0.5f,
          0.5f,  0.5f,  0.5f, -0.5f,  0.5f,  0.5f, -0.5f,  0.5f, -0.5f,
+    };*/
+
+    float vertexPositions[108] = {
+    0.0f,  1.0f, 0.0f, 0.0f, 0.0f, 0.0f,  1.0f, 0.0f, 0.0f,
+     1.0f, 0.0f, 0.0f,  1.0f,  1.0f, 0.0f, 0.0f,  1.0f, 0.0f,
+     1.0f, 0.0f, 0.0f,  1.0f, 0.0f,  1.0f,  1.0f,  1.0f, 0.0f,
+     1.0f, 0.0f,  1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  1.0f, 0.0f,
+     1.0f, 0.0f,  1.0f, 0.0f, 0.0f,  1.0f,  1.0f,  1.0f,  1.0f,
+    0.0f, 0.0f,  1.0f, 0.0f,  1.0f,  1.0f,  1.0f,  1.0f,  1.0f,
+    0.0f, 0.0f,  1.0f, 0.0f, 0.0f, 0.0f, 0.0f,  1.0f,  1.0f,
+    0.0f, 0.0f, 0.0f, 0.0f,  1.0f, 0.0f, 0.0f,  1.0f,  1.0f,
+    0.0f, 0.0f,  1.0f,  1.0f, 0.0f,  1.0f,  1.0f, 0.0f, 0.0f,
+     1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,  1.0f,
+    0.0f,  1.0f, 0.0f,  1.0f,  1.0f, 0.0f,  1.0f,  1.0f,  1.0f,
+     1.0f,  1.0f,  1.0f, 0.0f,  1.0f,  1.0f, 0.0f,  1.0f, 0.0f,
     };
 
     
-    Grid grid;
-    //grid.create_cyl(r, h);
-    //grid.create_sphere(10, 100, 0, 0);
+    Grid3D grid;
+
     glGenVertexArrays(2, vao);  // creates VAO and returns the integer ID
     glBindVertexArray(vao[0]);
     glGenBuffers(numVBOs, vbo);  // creates VBO and returns the integer ID
     glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
     // loads the cube vertices into the 0th VBO buffer
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexPositions), vertexPositions, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexPositions), vertexPositions, GL_DYNAMIC_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * grid.grid_draw.size(), grid.grid_draw.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * grid.grid_draw.size(), grid.grid_draw.data(), GL_DYNAMIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glEnableVertexAttribArray(1);
     glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glVertexAttribDivisor(1, 1);
 
-    glEnableVertexAttribArray(2);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(int) * grid.voxel_id.size(), grid.voxel_id.data(), GL_STATIC_DRAW);
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(int), (void*)0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     float l = 60;
     float dl = l / 30;
@@ -305,7 +316,7 @@ void init(GLFWwindow* window) {
 
 
 // repeatedly
-void display(GLFWwindow* window, double currentTime, Grid grid) {
+void display(GLFWwindow* window, double currentTime, Grid3D grid) {
 
     glClear(GL_DEPTH_BUFFER_BIT);
     glClearColor(0.0, 0.0, 0.0, 1.0);
@@ -318,26 +329,23 @@ void display(GLFWwindow* window, double currentTime, Grid grid) {
     glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * grid.grid_draw.size(), grid.grid_draw.data(), GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * grid.grid_draw.size(), grid.grid_draw.data(), GL_DYNAMIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glEnableVertexAttribArray(1);
     glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glVertexAttribDivisor(1, 1);
 
-    glEnableVertexAttribArray(2);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(int) * grid.voxel_id.size(), grid.voxel_id.data(), GL_DYNAMIC_DRAW);
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(int), (void*)0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
 
     glEnable(GL_CULL_FACE);
     glCullFace(GL_FRONT);
+
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     
     glDrawArraysInstanced(GL_TRIANGLES, 0, 36, grid.grid_draw.size());
 
@@ -350,7 +358,7 @@ void display(GLFWwindow* window, double currentTime, Grid grid) {
 
     glEnableVertexAttribArray(1);
     glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
 
     glEnable(GL_LINE_SMOOTH);
     glDrawArrays(GL_LINES, 0, 6*3);
@@ -385,104 +393,22 @@ int main(void) {
 
 
     UI_Data data;
-
-
-    data.r_b = 40;
+    data.r_b = 5;
     data.h_b = 1;
-    data.r_t = 51;
+    data.r_t = 5;
+    data.x_t = 0;
+    data.y_t = 0;
+    data.z_t = 0;
+    data.h_t = 5;
 
-    Grid grid;
-    grid.create_cyl(data.r_b, data.h_b);
+    Grid3D grid;
     
-
-    data.x_t = -100;
-    data.y_t = 62;
-    data.z_t = 10;
-    data.alfa = 3.14/2;
-    data.h_t = 20;
-    
-    grid.create_tool(data.r_t, 10, data.x_t, data.y_t, data.z_t, data.alfa, 0, 0);
-
-    float rad = 5;
-
-    int steps_prog = 0;
-
-    std::vector<glm::vec3> coords_tool;
-    std::vector<glm::vec3> angles_tool;
-
-    for (int i = 0; i < 150; i++)
-    {
-        float x_min = -50;
-        float x_max = 100;
-        float alfa_min = 0;
-        float alfa_max = 130;
-        
-        float dx = (x_max - x_min) / 100;
-        float dalfa = (alfa_max - alfa_min) / 100;
-
-
-
-        coords_tool.push_back(glm::vec3(-100 + i*dx, 0, -45));
-        angles_tool.push_back(glm::vec3(90 , i*dx, 0));
-    }
-
+    //grid.create_blank_grid(data.r_b, data.h_b);
+    //grid.set_draw();
+    grid.create_blank_dexel(data.r_b, data.h_b);
+    grid.grid_dexel_draw();
     while (!glfwWindowShouldClose(window)) {
 
-        data.G_code = get_G_code_bool();
-        
-        if (data.G_code)
-        {
-            grid.create_cyl(data.r_b, data.h_b);
-
-            while (steps_prog < coords_tool.size())
-            {
-            data.num_vert_b = grid.grid_blank.size();
-            data.num_vert_t = grid.grid_tool.size();
-            data.cam_yaw = camera.yaw;
-            data.cam_pitch = camera.pitch;
-
-            float t_1 = (GLfloat)glfwGetTime();
-
-            grid.create_tool(data.r_t, data.h_t, coords_tool[steps_prog].x, coords_tool[steps_prog].y, coords_tool[steps_prog].z, angles_tool[steps_prog].x, angles_tool[steps_prog].y, angles_tool[steps_prog].z);
-            steps_prog += 1;
-
-            float t_2 = (GLfloat)glfwGetTime();
-
-
-            grid.bolean_cut();
-
-
-            float t_3 = (GLfloat)glfwGetTime();
-
-
-            data.camPos = camera.cameraPos;
-            data.cam_speed = camera.cam_speed;
-            data.cam_pitch = camera.pitch;
-            data.cam_yaw = camera.yaw;
-
-            GLfloat currentFrame = (GLfloat)glfwGetTime();
-            deltaTime = currentFrame - lastFrame;
-            lastFrame = currentFrame;
-            data.delta_time = deltaTime;
-            display(window, glfwGetTime(), grid);
-            RenderUI(window, data);
-            camera.MoveCamera(window, deltaTime);
-            camera.UpdateMatrix(renderingProgram, renderingProgram_coords);
-            glfwSwapBuffers(window);
-            glfwPollEvents();
-            float t_0 = (GLfloat)glfwGetTime();
-
-            data.t1 = add_data_to_plot(data.t1, (t_2 - t_1));
-            data.t2 = add_data_to_plot(data.t2, (t_3 - t_2));
-            data.t3 = add_data_to_plot(data.t3, (t_0 - t_3));
-            }
-
-            steps_prog = 0;
-            
-
-        }
-        else
-        {
 
             data.x_t = get_coord_tool().x;
             data.y_t = get_coord_tool().y;
@@ -492,26 +418,29 @@ int main(void) {
             data.y_a_t = get_angle_tool().y;
             data.z_a_t = get_angle_tool().z;
 
-            //data.get_inputs(window, grid);
+            data.r_t = get_tool_and_blank().x;
+            data.h_t = get_tool_and_blank().y;
+            data.r_b = get_tool_and_blank().z;
+            data.h_b = get_tool_and_blank().w;
 
-            data.num_vert_b = grid.grid_blank.size();
-            data.num_vert_t = grid.grid_tool.size();
+
+            data.num_vert_b = grid.grid_test.size();
+            data.num_vert_t = grid.grid.size();
             data.cam_yaw = camera.yaw;
             data.cam_pitch = camera.pitch;
 
             float t_1 = (GLfloat)glfwGetTime();
-
-            grid.create_tool(data.r_t, data.h_t, data.x_t, data.y_t, data.z_t, data.x_a_t, data.y_a_t, data.z_a_t);
-
+            // Генерация точек инструмента
+            //grid.create_blank_grid(data.r_b, data.h_b);
+            grid.create_blank_dexel(data.r_b, data.h_b);
 
             float t_2 = (GLfloat)glfwGetTime();
-
-
-            grid.bolean_cut();
-            //grid.create_draw_grid();
+            // Булева операция
+            //grid.set_draw();
+            grid.grid_dexel_draw();
 
             float t_3 = (GLfloat)glfwGetTime();
-
+            // Камера + рендер
 
             data.camPos = camera.cameraPos;
             data.cam_speed = camera.cam_speed;
@@ -530,13 +459,13 @@ int main(void) {
             glfwPollEvents();
             float t_0 = (GLfloat)glfwGetTime();
 
-            //data.t0 = add_data_to_plot(data.t0, (t_1 - t_0));
             data.t1 = add_data_to_plot(data.t1, (t_2 - t_1));
             data.t2 = add_data_to_plot(data.t2, (t_3 - t_2));
             data.t3 = add_data_to_plot(data.t3, (t_0 - t_3));
-        }
+        
         
     }
+
 
     ImGui::DestroyContext();
     ImPlot::DestroyContext();

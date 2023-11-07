@@ -1,7 +1,7 @@
 #version 430
 
 layout (location=0) in vec3 position;  // coord
-layout (location = 1) in vec3 aOffset;
+layout (location = 1) in vec4 aOffset;
 layout (location = 2) in int voxel_id;
 
 
@@ -10,7 +10,6 @@ uniform mat4 proj_matrix;
 
 
 out vec4 varyingColor;  // be interpolated by the rasterizer
-out vec3 voxel_color;
 
 
 vec3 hash31(float p)
@@ -27,10 +26,9 @@ void main(void)
 
     //gl_PointSize = 1.0;
 
-    mat4 mv_matrix = v_matrix;
-    voxel_color = hash31(voxel_id);   
-    
-    gl_Position = proj_matrix * mv_matrix * vec4(position + aOffset, 1.0);  // right-to-left
+    mat4 mv_matrix = v_matrix;  
+
+    gl_Position = vec4(proj_matrix * mv_matrix * vec4(vec3((position.x + aOffset.x)/1, (position.y + aOffset.y)/1, (position.z*aOffset.w + aOffset.z)/1), 1.0));  // right-to-left
     varyingColor = vec4(position, 1.0) * 0.5 + vec4(0.5, 0.5, 0.5, 0.5);
 }
 

@@ -14,4 +14,5 @@ void RenderUI(GLFWwindow* window, UI_Data data);
 bool get_G_code_bool();
 glm::vec3 get_coord_tool();
 glm::vec3 get_angle_tool();
+glm::vec4 get_tool_and_blank();
 

@@ -13,8 +13,8 @@ bool G_code_u = false;
 float r_tool;
 float h_tool;
 
-float r_blank;
-float h_blank;
+float r_blank = 10;
+float h_blank = 10;
 
 float x_t=-100, y_t, z_t, a_x_t, a_y_t, a_z_t;
 
@@ -64,6 +64,11 @@ glm::vec3 get_angle_tool()
 	return glm::vec3(a_x_t, a_y_t, a_z_t);
 }
 
+glm::vec4 get_tool_and_blank()
+{
+	return glm::vec4(r_tool, h_tool, r_blank, h_blank);
+}
+
 void RenderUI(GLFWwindow* window, UI_Data data)
 {
 	int FPS = (int)(1 / data.delta_time);
@@ -103,6 +108,10 @@ void RenderUI(GLFWwindow* window, UI_Data data)
 	//ImGui::Text(t_x.c_str());
 	//ImGui::Text(t_y.c_str());
 	//ImGui::Text(t_z.c_str());
+	ImGui::SliderFloat("R tool", &r_tool, 1.0f, 100.0f);
+	ImGui::SliderFloat("H tool", &h_tool, 1.0f, 100.0f);
+	ImGui::SliderFloat("R blank", &r_blank, 1.0f, 100.0f);
+	ImGui::SliderFloat("H blank", &h_blank, 1.0f, 500.0f);
 	ImGui::SliderFloat("X", &x_t, -100.0f, 100.0f);
 	ImGui::SliderFloat("Y", &y_t, -100.0f, 100.0f);
 	ImGui::SliderFloat("Z", &z_t, -100.0f, 100.0f);

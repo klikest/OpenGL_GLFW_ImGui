@@ -73,6 +73,127 @@ void Grid::create_cyl(int r, int h)
 
 }
 
+void Grid::create_cyl_dexels(int r, int h)
+{
+    dexels_blank.clear();
+    for (int i = -r; i < r; i++)
+    {
+        for (int j = -r; j < r; j++)
+        {
+            if (scalar_cyl(r, i, j))
+            {
+                dexels_blank.push_back(glm::vec4(i, j, 0, h));
+            }
+            else
+            {
+                dexels_blank.push_back(glm::vec4(i, j, 0, 0));
+            }
+
+        }
+    }
+
+}
+
+
+void Grid::create_tool_dexels(int r, int h, float dx, float dy, float dz, float x_a, float y_a, float z_a)
+{
+    dexels_tool.clear();
+    grid_tool.clear();
+    for (int i = -r; i < r; i += 1)
+    {
+        for (int j = -r; j < r; j += 1)
+        {
+            for (int k = 0; k < h; k += 1)
+            {
+                if (scalar_cyl(r, i, j))
+                {
+
+                    grid_tool.push_back(glm::vec3(round(dx + i), round(dy + j), round(dz + k)));
+                }
+
+            }
+        }
+    }
+
+    int x_min = grid_tool[0].x, x_max = grid_tool[0].x;
+    int y_min = grid_tool[0].y, y_max = grid_tool[0].y;
+    int z_min = grid_tool[0].z, z_max = grid_tool[0].z;
+
+    for (int i = 0; i < grid_tool.size(); i++)
+    {
+        float new_x = grid_tool[i].x;
+        float new_y = grid_tool[i].y;
+        float new_z = grid_tool[i].z;
+        if (new_x > x_max) { x_max = new_x; }
+        if (new_x < x_min) { x_min = new_x; }
+        if (new_y > y_max) { y_max = new_y; }
+        if (new_y < y_min) { y_min = new_y; }
+        if (new_z > z_max) { z_max = new_z; }
+        if (new_z < z_min) { z_min = new_z; }
+    }
+
+    for (int i = x_min; i < x_max; i++)
+    {
+        for (int j = y_min; j < y_max; j++)
+        {
+            int z_buff = 0;
+            int z_0 = z_min;
+
+            for (int k = z_min; k < z_max; k++)
+            {
+                for (int n = 0; n < grid_tool.size(); n++)
+                {
+                    if (grid_tool[n].x == i && grid_tool[n].y == j && grid_tool[n].z == k)
+                    {
+                        z_buff += 1;
+                        z_0 = k;
+
+                    }
+
+                }
+
+            }
+            dexels_tool.push_back(glm::vec4(i, j, z_0, z_buff));
+        }
+    }
+
+
+}
+
+
+void Grid::draw_dexels()
+{
+    grid_draw.clear();
+    for (int i = 0; i < dexels_blank.size(); i++)
+    {
+        if (dexels_blank[i].w > 0)
+        {
+            for (int j = 0; j < dexels_blank[i].w; j++)
+            {
+                grid_draw.push_back(glm::vec3(dexels_blank[i].x, dexels_blank[i].y, j));
+            }
+        }
+
+    }
+
+    for (int i = 0; i < dexels_tool.size(); i++)
+    {
+        if (dexels_tool[i].w > 0)
+        {
+            for (int j = 0; j < dexels_tool[i].w; j++)
+            {
+                grid_draw.push_back(glm::vec3(dexels_tool[i].x, dexels_tool[i].y, dexels_tool[i].w +j));
+            }
+        }
+
+    }
+
+}
+
+
+
+
+
 void Grid::create_tool(int r, int h, float dx, float dy, float dz, float x_a, float y_a, float z_a)
 {
     grid_tool.clear();
