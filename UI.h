@@ -6,7 +6,7 @@
 #include <GLFW\glfw3.h>
 #include "UI_Data.h"
 #include "implot.h"
-
+#include "FrameBuffer.h"
 
 
 void InitUI(GLFWwindow* window);

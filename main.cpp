@@ -24,6 +24,7 @@
 #include "UI_Data.h"
 #include "Grid.h"
 #include "Grid3D.h"
+//#include "FrameBuffer.h"
 
 using namespace std;
 
@@ -36,6 +37,9 @@ float cubeLocX, cubeLocY, cubeLocZ;
 GLuint renderingProgram, renderingProgram_coords;
 GLuint vao[numVAOs];
 GLuint vbo[numVBOs];
+GLuint fbo;
+GLuint texture;
+GLuint rbo;
 
 int displayLoopi;
 
@@ -183,22 +187,6 @@ std::vector<float> add_data_to_plot(std::vector<float> data, float new_data)
 
 
 void setupVertices(void) {
-    // 12 triangles * 3 vertices * 3 values (x, y, z)
-    /*float vertexPositions[108] = {
-        -0.5f,  0.5f, -0.5f, -0.5f, -0.5f, -0.5f,  0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,  0.5f,  0.5f, -0.5f, -0.5f,  0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,  0.5f, -0.5f,  0.5f,  0.5f,  0.5f, -0.5f,
-         0.5f, -0.5f,  0.5f,  0.5f,  0.5f,  0.5f,  0.5f,  0.5f, -0.5f,
-         0.5f, -0.5f,  0.5f, -0.5f, -0.5f,  0.5f,  0.5f,  0.5f,  0.5f,
-        -0.5f, -0.5f,  0.5f, -0.5f,  0.5f,  0.5f,  0.5f,  0.5f,  0.5f,
-        -0.5f, -0.5f,  0.5f, -0.5f, -0.5f, -0.5f, -0.5f,  0.5f,  0.5f,
-        -0.5f, -0.5f, -0.5f, -0.5f,  0.5f, -0.5f, -0.5f,  0.5f,  0.5f,
-        -0.5f, -0.5f,  0.5f,  0.5f, -0.5f,  0.5f,  0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f, -0.5f, -0.5f, -0.5f, -0.5f, -0.5f,  0.5f,
-        -0.5f,  0.5f, -0.5f,  0.5f,  0.5f, -0.5f,  0.5f,  0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f, -0.5f,  0.5f,  0.5f, -0.5f,  0.5f, -0.5f,
-    };*/
-
     float vertexPositions[108] = {
     0.0f,  1.0f, 0.0f, 0.0f, 0.0f, 0.0f,  1.0f, 0.0f, 0.0f,
      1.0f, 0.0f, 0.0f,  1.0f,  1.0f, 0.0f, 0.0f,  1.0f, 0.0f,
@@ -297,8 +285,10 @@ void setupVertices(void) {
     glBufferData(GL_ARRAY_BUFFER, sizeof(color), color, GL_STATIC_DRAW);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
-
 }
+
+
+
 
 // once
 void init(GLFWwindow* window) {
@@ -349,7 +339,6 @@ void display(GLFWwindow* window, double currentTime, Grid3D grid) {
     
     glDrawArraysInstanced(GL_TRIANGLES, 0, 36, grid.grid_draw.size());
 
-
     
     glUseProgram(renderingProgram_coords);
     glEnableVertexAttribArray(0);// creates VBO and returns the integer ID
@@ -391,10 +380,9 @@ int main(void) {
     camera.cameraPos = glm::vec3(-64, 92, 100);
     camera.cam_speed = 100;
 
-
     UI_Data data;
-    data.r_b = 5;
-    data.h_b = 1;
+    data.r_b = 10;
+    data.h_b = 10;
     data.r_t = 5;
     data.x_t = 0;
     data.y_t = 0;
@@ -405,8 +393,10 @@ int main(void) {
     
     //grid.create_blank_grid(data.r_b, data.h_b);
     //grid.set_draw();
-    grid.create_blank_dexel(data.r_b, data.h_b);
-    grid.grid_dexel_draw();
+    grid.create_blank_dexel_dyn(data.r_b, data.h_b);
+    //grid.create_tool_dexel(data.r_t, data.h_t, data.x_t, data.y_t, data.z_t, 0, 0, 0);
+
+    grid.grid_dexel_draw_dyn();
     while (!glfwWindowShouldClose(window)) {
 
 
@@ -432,12 +422,13 @@ int main(void) {
             float t_1 = (GLfloat)glfwGetTime();
             // Генерация точек инструмента
             //grid.create_blank_grid(data.r_b, data.h_b);
-            grid.create_blank_dexel(data.r_b, data.h_b);
+            grid.create_blank_dexel_dyn(data.r_b, data.h_b);
+            //grid.create_tool_dexel(data.r_t, data.h_t, data.x_t, data.y_t, data.z_t, 0, 0, 0);
 
             float t_2 = (GLfloat)glfwGetTime();
             // Булева операция
             //grid.set_draw();
-            grid.grid_dexel_draw();
+            grid.grid_dexel_draw_dyn();
 
             float t_3 = (GLfloat)glfwGetTime();
             // Камера + рендер

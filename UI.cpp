@@ -110,7 +110,7 @@ void RenderUI(GLFWwindow* window, UI_Data data)
 	//ImGui::Text(t_z.c_str());
 	ImGui::SliderFloat("R tool", &r_tool, 1.0f, 100.0f);
 	ImGui::SliderFloat("H tool", &h_tool, 1.0f, 100.0f);
-	ImGui::SliderFloat("R blank", &r_blank, 1.0f, 100.0f);
+	ImGui::SliderFloat("R blank", &r_blank, 1.0f, 400.0f);
 	ImGui::SliderFloat("H blank", &h_blank, 1.0f, 500.0f);
 	ImGui::SliderFloat("X", &x_t, -100.0f, 100.0f);
 	ImGui::SliderFloat("Y", &y_t, -100.0f, 100.0f);
@@ -129,6 +129,7 @@ void RenderUI(GLFWwindow* window, UI_Data data)
 	ImGui::Text(pitch.c_str());
 	//ImGui::ShowDemoWindow();
 	ImGui::End();
+
 	ImGui::Render();
 	int display_w, display_h;
 	glfwGetFramebufferSize(window, &display_w, &display_h);

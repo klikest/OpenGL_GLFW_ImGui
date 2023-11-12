@@ -34,7 +34,7 @@
         cameraFront = glm::normalize(front);
 
 
-        pMat = glm::perspective(1.0472f, aspect, 0.1f, 1000.0f); // 1.0472 radians == 60 degrees
+        pMat = glm::perspective(1.0472f, aspect, 0.1f, 10000.0f); // 1.0472 radians == 60 degrees
         vMat = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 
         lastX = (GLfloat)(width / 2.0);
