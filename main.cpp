@@ -319,7 +319,7 @@ void display(GLFWwindow* window, double currentTime, Grid3D grid) {
     glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * grid.grid_draw.size(), grid.grid_draw.data(), GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * grid.grid_draw.size(), grid.grid_draw.data(), GL_STREAM_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glEnableVertexAttribArray(1);
@@ -377,12 +377,12 @@ int main(void) {
     Camera camera(window, glm::vec3(-10.0f, 10.0f, 20.0f), -62, -25);
 
 
-    camera.cameraPos = glm::vec3(-64, 92, 100);
+    camera.cameraPos = glm::vec3(-500, 470, 1050);
     camera.cam_speed = 100;
 
     UI_Data data;
-    data.r_b = 10;
-    data.h_b = 10;
+    data.r_b = 399;
+    data.h_b = 499;
     data.r_t = 5;
     data.x_t = 0;
     data.y_t = 0;

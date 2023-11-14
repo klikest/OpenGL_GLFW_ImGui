@@ -13,8 +13,8 @@ bool G_code_u = false;
 float r_tool;
 float h_tool;
 
-float r_blank = 10;
-float h_blank = 10;
+float r_blank = 400;
+float h_blank = 500;
 
 float x_t=-100, y_t, z_t, a_x_t, a_y_t, a_z_t;
 
@@ -110,8 +110,8 @@ void RenderUI(GLFWwindow* window, UI_Data data)
 	//ImGui::Text(t_z.c_str());
 	ImGui::SliderFloat("R tool", &r_tool, 1.0f, 100.0f);
 	ImGui::SliderFloat("H tool", &h_tool, 1.0f, 100.0f);
-	ImGui::SliderFloat("R blank", &r_blank, 1.0f, 400.0f);
-	ImGui::SliderFloat("H blank", &h_blank, 1.0f, 500.0f);
+	ImGui::SliderFloat("R blank", &r_blank, 1.0f, 1000.0f);
+	ImGui::SliderFloat("H blank", &h_blank, 1.0f, 1000.0f);
 	ImGui::SliderFloat("X", &x_t, -100.0f, 100.0f);
 	ImGui::SliderFloat("Y", &y_t, -100.0f, 100.0f);
 	ImGui::SliderFloat("Z", &z_t, -100.0f, 100.0f);

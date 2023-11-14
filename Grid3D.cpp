@@ -1,5 +1,9 @@
 #include "Grid3D.h"
 #include "thread"
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <execution>
 
 
 void Grid3D::create_blank_dexel(float r, float h)
@@ -27,26 +31,35 @@ void Grid3D::create_blank_dexel_dyn(float r, float h)
 
     if (X_blank_size != 2 * r && Y_blank_size != 2 * r)
     {
-        X_blank_size = 2 * r;
-        Y_blank_size = 2 * r;
+        X_blank_size = (2 * r)+10 ;
+        Y_blank_size = (2 * r) + 10;
         delete[] d_blank_pointer;
         d_blank_pointer = nullptr;
         d_blank_pointer = new glm::vec2[X_blank_size * Y_blank_size];
     }
+    X_blank_size = (2 * r) + 10;
+    Y_blank_size = (2 * r) + 10;
 
+    std::vector<int> iter;
+    iter.resize(X_blank_size * Y_blank_size);
     for (int i = 0; i < X_blank_size * Y_blank_size; i++)
-    {
-        if (Scalar_cyl(r, i % X_blank_size - X_blank_size / 2, (i / X_blank_size) % Y_blank_size - Y_blank_size / 2))
+        iter[i] = i;
+
+    std::for_each(std::execution::par, iter.begin(), iter.end(),
+        [this, r, h](int i)
         {
-            d_blank_pointer[i].y = h;
-            d_blank_pointer[i].x = 0;
-        }
-        else
-        {
-            d_blank_pointer[i].y = 0;
-            d_blank_pointer[i].x = 0;
-        }
-    }
+            if (Scalar_cyl(r, i % X_blank_size - X_blank_size / 2, (i / X_blank_size) % Y_blank_size - Y_blank_size / 2))
+            {
+                d_blank_pointer[i].y = h;
+                d_blank_pointer[i].x = 0;
+            }
+            else
+            {
+                d_blank_pointer[i].y = 0;
+                d_blank_pointer[i].x = 0;
+            }
+        });
+
 
 }
 
@@ -156,20 +169,32 @@ void Grid3D::grid_dexel_draw()
 void Grid3D::grid_dexel_draw_dyn()
 {
     grid_draw.clear();
-
+    
     for (int j = 0; j < X_blank_size * Y_blank_size; j++)
     {
         if (d_blank_pointer[j].y != 0)
         {
-            //if ((j > 1 && j < (X_blank_size * Y_blank_size)-1 && d_blank_pointer[j - 1].y == 0) || (j > 1 && j < (X_blank_size * Y_blank_size)-1 && d_blank_pointer[j + 1].y == 0)  || (j > X_blank_size && j < (X_blank_size * Y_blank_size) - X_blank_size && d_blank_pointer[j + X_blank_size].y == 0) || (j > X_blank_size && j < (X_blank_size * Y_blank_size) - X_blank_size && d_blank_pointer[j - X_blank_size].y == 0))
-            //{
-            //    grid_draw.push_back(glm::vec4(j % X_blank_size - X_blank_size / 2, (j / X_blank_size) % Y_blank_size - Y_blank_size / 2, d_blank_pointer[j].x, d_blank_pointer[j].y));
-            //}
+            if ( (j> X_blank_size && j <(X_blank_size * Y_blank_size)- X_blank_size)
+                &&
+                d_blank_pointer[j + 1].y != 0
+                &&
+                d_blank_pointer[j - 1].y != 0
+                &&
+                d_blank_pointer[j + X_blank_size].y != 0
+                &&
+                d_blank_pointer[j - X_blank_size].y != 0)
+            {
+                grid_draw.push_back(glm::vec4(j % X_blank_size - X_blank_size / 2, (j / X_blank_size) % Y_blank_size - Y_blank_size / 2, d_blank_pointer[j].x, 1));
+                grid_draw.push_back(glm::vec4(j % X_blank_size - X_blank_size / 2, (j / X_blank_size) % Y_blank_size - Y_blank_size / 2, d_blank_pointer[j].y-1, 1));
+            }
+            else
+            {
+                grid_draw.push_back(glm::vec4(j % X_blank_size - X_blank_size / 2, (j / X_blank_size) % Y_blank_size - Y_blank_size / 2, d_blank_pointer[j].x, d_blank_pointer[j].y));
+            }
 
-            grid_draw.push_back(glm::vec4(j % X_blank_size - X_blank_size / 2, (j / X_blank_size) % Y_blank_size - Y_blank_size / 2, d_blank_pointer[j].x, d_blank_pointer[j].y));
         }
-    }
 
+    }
 }
 
 

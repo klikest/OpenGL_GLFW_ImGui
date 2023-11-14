@@ -10,6 +10,7 @@
 #include <glm.hpp>
 #include <gtc/type_ptr.hpp>
 #include <gtc/matrix_transform.hpp>
+#include <execution>
 
 class Grid3D
 {
@@ -19,6 +20,8 @@ public:
 	std::vector<glm::vec4> grid_draw;
 	std::vector<std::vector<glm::vec2>> dexel_blank;
 	glm::vec2* d_blank_pointer;
+
+
 	std::vector<glm::vec2> dexel_tool;
 
 	std::vector<glm::vec3> tool_grid;
