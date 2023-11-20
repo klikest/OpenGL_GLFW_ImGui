@@ -35,7 +35,7 @@ public:
 
     Camera(GLFWwindow* window, glm::vec3 campos_, float yaw_, float pitch);
     void MoveCamera(GLFWwindow* window, GLfloat deltaTime);
-    void UpdateMatrix(GLuint shader, GLuint shader_coords);
+    void UpdateMatrix(GLuint shader, GLuint shader_coords, GLuint shader_rect);
 
 };
 

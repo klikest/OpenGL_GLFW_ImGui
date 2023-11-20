@@ -16,7 +16,7 @@ float h_tool = 10;
 float r_blank = 1;
 float h_blank = 1;
 
-float x_t=-100, y_t, z_t, a_x_t, a_y_t, a_z_t;
+float x_t=0, y_t=0, z_t=0, a_x_t=0, a_y_t=0, a_z_t=0;
 
 void InitUI(GLFWwindow* window)
 {

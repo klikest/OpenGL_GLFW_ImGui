@@ -4,6 +4,7 @@
 #include <vector>
 #include <algorithm>
 #include <execution>
+#include "UI_Data.h"
 
 
 void Grid3D::create_blank_dexel(float r, float h)
@@ -79,11 +80,23 @@ void Grid3D::create_tool_dexel_dyn(float r, float h, float dx, float dy, float d
                 if (Scalar_cyl(r, i, j))
                 {
 
-                    glm::vec4 coords = glm::vec4(i+r, j+r, k, 1.0f);
+                    glm::vec4 coords_0 = glm::vec4(i+r, j+r, k, 1.0f);
 
-                    int x_new = round(coords.x );
-                    int y_new = round(coords.y );
-                    int z_new = round(coords.z);
+                    glm::mat4 trans_y = glm::mat4(1.0f);
+                    trans_y = glm::rotate(trans_y, glm::radians(ax), glm::vec3(1.0f, 0.0f, 0.0f));
+                    glm::vec4 coords__ = trans_y * glm::vec4(coords_0.x, coords_0.y, coords_0.z, 1.0f);
+
+                    glm::mat4 trans_x = glm::mat4(1.0f);
+                    trans_x = glm::rotate(trans_x, glm::radians(ay), glm::vec3(0.0f, 1.0f, 0.0f));
+                    glm::vec4 coords_ = trans_x * coords__;
+
+                    glm::mat4 trans_z = glm::mat4(1.0f);
+                    trans_z = glm::rotate(trans_z, glm::radians(az), glm::vec3(0.0f, 0.0f, 1.0f));
+                    glm::vec4 coords = trans_z * coords_;
+
+                    int x_new = round(coords.x + 10 );
+                    int y_new = round(coords.y + 10 );
+                    int z_new = round(coords.z + dz);
 
                     if (x_new > x_max) { x_max = x_new; }
                     if (x_new < x_min) { x_min = x_new; }
@@ -92,7 +105,7 @@ void Grid3D::create_tool_dexel_dyn(float r, float h, float dx, float dy, float d
                     if (z_new > z_max) { z_max = z_new; }
                     if (z_new < z_min) { z_min = z_new; }
 
-                    tool_grid.push_back(glm::vec3(x_new , y_new , z_new ));
+                    tool_grid.push_back(glm::vec3(x_new, y_new, z_new));
 
                 }
 
@@ -100,8 +113,11 @@ void Grid3D::create_tool_dexel_dyn(float r, float h, float dx, float dy, float d
         }
     }
     
-    X_tool_size = x_max - x_min;
-    Y_tool_size = y_max - y_min;
+    tool_min_rect = glm::vec3(x_min, y_min, z_min);
+    tool_max_rect = glm::vec3(x_max, y_max, z_max);
+
+    X_tool_size = x_max - x_min + 20;
+    Y_tool_size = y_max - y_min + 20;
 
     tool_dexel_grid.resize(X_tool_size * Y_tool_size);
     for (int i = 0; i < tool_dexel_grid.size(); i++)
@@ -279,7 +295,7 @@ void Grid3D::grid_dexel_draw_dyn()
 
         if (tool_dexel_grid[i].y != 0)
         {
-            grid_draw.push_back(glm::vec4(i % X_tool_size - X_tool_size / 2, (i / X_tool_size) % Y_tool_size - Y_tool_size / 2, tool_dexel_grid[i].x, tool_dexel_grid[i].y));
+            grid_draw.push_back(glm::vec4(i % X_tool_size - X_tool_size / 2 , (i / X_tool_size) % Y_tool_size - Y_tool_size / 2 , tool_dexel_grid[i].x, tool_dexel_grid[i].y));
         }
 
     }

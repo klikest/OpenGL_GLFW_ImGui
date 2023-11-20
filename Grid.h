@@ -20,8 +20,8 @@ public:
     std::vector<glm::vec3> grid_tool;
     std::vector<glm::vec3> grid_blank;
     std::vector<glm::vec3> tmp_vec;
-    std::vector<glm::vec4> dexels_blank;
-    std::vector<glm::vec4> dexels_tool;
+    //std::vector<glm::vec4> dexels_blank;
+    //std::vector<glm::vec4> dexels_tool;
 
     std::vector<glm::vec4> dexels_tool;
     std::vector<glm::vec4> dexels_blank;

@@ -26,6 +26,9 @@ public:
 	std::vector < glm::vec4> tool_dexel_cloud;
 	std::vector < glm::vec2> tool_dexel_grid;
 
+	glm::vec3 tool_min_rect;
+	glm::vec3 tool_max_rect;
+
 
 	std::vector<glm::vec2> dexel_tool;
 

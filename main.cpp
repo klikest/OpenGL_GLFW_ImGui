@@ -28,13 +28,13 @@
 
 using namespace std;
 
-#define numVAOs 2
-#define numVBOs 5
+#define numVAOs 3
+#define numVBOs 6
 
 //Utils util = Utils();
 float cameraX, cameraY, cameraZ;
 float cubeLocX, cubeLocY, cubeLocZ;
-GLuint renderingProgram, renderingProgram_coords;
+GLuint renderingProgram, renderingProgram_coords, renderingProgram_rect;
 GLuint vao[numVAOs];
 GLuint vbo[numVBOs];
 GLuint fbo;
@@ -53,6 +53,59 @@ GLfloat lastFrame = 0.0f;
 
 int r = 5, h = 5;
 int r_t = 1, h_t = 1;
+
+
+float l = 10;
+float dl = l / 30;
+float d = l - dl;
+
+
+float line[] = {
+0.0, 0.0, 0.0,
+l, 0.0, 0.0,
+l, 0.0, 0.0,
+d, 0.0, dl,
+l, 0.0, 0.0,
+d, 0.0, -dl,
+
+0.0, 0.0, 0.0,
+0.0, l, 0.0,
+0.0, l, 0.0,
+0.0, d, dl,
+0.0, l, 0.0,
+0.0, d, -dl,
+
+0.0, 0.0, 0.0,
+0.0, 0.0, l,
+0.0, 0.0, l,
+0.0, dl, d,
+0.0, 0.0, l,
+0.0, -dl, d
+};
+float color[] = {
+1.0, 0.0, 0.0,
+1.0, 0.0, 0.0,
+1.0, 0.0, 0.0,
+1.0, 0.0, 0.0,
+1.0, 0.0, 0.0,
+1.0, 0.0, 0.0,
+
+0.0, 1.0, 0.0,
+0.0, 1.0, 0.0,
+0.0, 1.0, 0.0,
+0.0, 1.0, 0.0,
+0.0, 1.0, 0.0,
+0.0, 1.0, 0.0,
+
+0.0, 0.0, 1.0,
+0.0, 0.0, 1.0,
+0.0, 0.0, 1.0,
+0.0, 0.0, 1.0,
+0.0, 0.0, 1.0,
+0.0, 0.0, 1.0
+};
+
+
 
 
 string prog_0 = "G1 X0; G1 Y0; G1 Z0";
@@ -205,7 +258,7 @@ void setupVertices(void) {
     
     Grid3D grid;
 
-    glGenVertexArrays(2, vao);  // creates VAO and returns the integer ID
+    glGenVertexArrays(numVAOs, vao);  // creates VAO and returns the integer ID
     glBindVertexArray(vao[0]);
     glGenBuffers(numVBOs, vbo);  // creates VBO and returns the integer ID
     glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
@@ -221,57 +274,7 @@ void setupVertices(void) {
     glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glVertexAttribDivisor(1, 1);
-
-
-    float l = 10;
-    float dl = l / 30;
-    float d = l - dl;
     
-
-    float line[] = {
-    0.0, 0.0, 0.0,
-    l, 0.0, 0.0,
-    l, 0.0, 0.0,
-    d, 0.0, dl,
-    l, 0.0, 0.0,
-    d, 0.0, -dl,
-
-    0.0, 0.0, 0.0,
-    0.0, l, 0.0,
-    0.0, l, 0.0,
-    0.0, d, dl,
-    0.0, l, 0.0,
-    0.0, d, -dl,
-
-    0.0, 0.0, 0.0,
-    0.0, 0.0, l,
-    0.0, 0.0, l,
-    0.0, dl, d,
-    0.0, 0.0, l,
-    0.0, -dl, d
-    };
-    float color[] = {
-    1.0, 0.0, 0.0,
-    1.0, 0.0, 0.0,
-    1.0, 0.0, 0.0,
-    1.0, 0.0, 0.0,
-    1.0, 0.0, 0.0,
-    1.0, 0.0, 0.0,
-
-    0.0, 1.0, 0.0,
-    0.0, 1.0, 0.0,
-    0.0, 1.0, 0.0,
-    0.0, 1.0, 0.0,
-    0.0, 1.0, 0.0,
-    0.0, 1.0, 0.0,
-
-    0.0, 0.0, 1.0,
-    0.0, 0.0, 1.0,
-    0.0, 0.0, 1.0,
-    0.0, 0.0, 1.0,
-    0.0, 0.0, 1.0,
-    0.0, 0.0, 1.0
-    };
 
      // creates VAO and returns the integer ID
     glBindVertexArray(vao[1]);
@@ -285,6 +288,15 @@ void setupVertices(void) {
     glBufferData(GL_ARRAY_BUFFER, sizeof(color), color, GL_STATIC_DRAW);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
+
+
+    // creates VAO and returns the integer ID
+    glBindVertexArray(vao[2]);
+    glEnableVertexAttribArray(0);// creates VBO and returns the integer ID
+    glBindBuffer(GL_ARRAY_BUFFER, vbo[5]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(line), line, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
 }
 
 
@@ -294,6 +306,7 @@ void setupVertices(void) {
 void init(GLFWwindow* window) {
     renderingProgram = createShaderProgram((char*)"vert_shader.glsl", (char*)"frag_shader.glsl");
     renderingProgram_coords = createShaderProgram((char*)"coords_vert.glsl", (char*)"coords_frag.glsl");
+    renderingProgram_rect = createShaderProgram((char*)"rect_vert.glsl", (char*)"coords_frag.glsl");
 
     setupVertices();
 
@@ -343,6 +356,7 @@ void display(GLFWwindow* window, double currentTime, Grid3D grid) {
     glUseProgram(renderingProgram_coords);
     glEnableVertexAttribArray(0);// creates VBO and returns the integer ID
     glBindBuffer(GL_ARRAY_BUFFER, vbo[3]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6*3*3, line, GL_DYNAMIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
     glEnableVertexAttribArray(1);
@@ -353,6 +367,49 @@ void display(GLFWwindow* window, double currentTime, Grid3D grid) {
     glEnable(GL_LINE_SMOOTH);
     glDrawArrays(GL_LINES, 0, 6*3);
     
+
+    float rect_lines[] = {
+    grid.tool_min_rect.x, grid.tool_min_rect.y, grid.tool_min_rect.z,
+    grid.tool_max_rect.x, grid.tool_min_rect.y, grid.tool_min_rect.z,
+
+    grid.tool_min_rect.x, grid.tool_min_rect.y, grid.tool_min_rect.z,
+    grid.tool_min_rect.x, grid.tool_max_rect.y, grid.tool_min_rect.z,
+
+    grid.tool_min_rect.x, grid.tool_min_rect.y, grid.tool_min_rect.z,
+    grid.tool_min_rect.x, grid.tool_min_rect.y, grid.tool_max_rect.z,
+
+    grid.tool_max_rect.x, grid.tool_max_rect.y, grid.tool_max_rect.z,
+    grid.tool_max_rect.x, grid.tool_min_rect.y, grid.tool_max_rect.z,
+
+    grid.tool_max_rect.x, grid.tool_max_rect.y, grid.tool_max_rect.z,
+    grid.tool_max_rect.x, grid.tool_max_rect.y, grid.tool_min_rect.z,
+
+    grid.tool_max_rect.x, grid.tool_max_rect.y, grid.tool_max_rect.z,
+    grid.tool_min_rect.x, grid.tool_max_rect.y, grid.tool_max_rect.z,
+
+    grid.tool_min_rect.x, grid.tool_min_rect.y, grid.tool_max_rect.z,
+    grid.tool_min_rect.x, grid.tool_max_rect.y, grid.tool_max_rect.z,
+
+    grid.tool_min_rect.x, grid.tool_max_rect.y, grid.tool_min_rect.z,
+    grid.tool_min_rect.x, grid.tool_max_rect.y, grid.tool_max_rect.z,
+
+    grid.tool_max_rect.x, grid.tool_min_rect.y, grid.tool_min_rect.z,
+    grid.tool_max_rect.x, grid.tool_min_rect.y, grid.tool_max_rect.z,
+
+    grid.tool_min_rect.x, grid.tool_min_rect.y, grid.tool_max_rect.z,
+    grid.tool_max_rect.x, grid.tool_min_rect.y, grid.tool_max_rect.z,
+
+    grid.tool_min_rect.x, grid.tool_max_rect.y, grid.tool_min_rect.z,
+    grid.tool_max_rect.x, grid.tool_max_rect.y, grid.tool_min_rect.z
+    };
+
+    glUseProgram(renderingProgram_rect);
+    glEnableVertexAttribArray(0);// creates VBO and returns the integer ID
+    glBindBuffer(GL_ARRAY_BUFFER, vbo[3]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 22*3, rect_lines, GL_DYNAMIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+    glDrawArrays(GL_LINES, 0, 22);
 
 }
 
@@ -399,6 +456,7 @@ int main(void) {
     grid.grid_dexel_draw_dyn();
     while (!glfwWindowShouldClose(window)) {
 
+            //draw_rect_data(grid);
 
             data.x_t = get_coord_tool().x;
             data.y_t = get_coord_tool().y;
@@ -423,7 +481,7 @@ int main(void) {
             // Генерация точек инструмента
 
             grid.create_blank_dexel_dyn(data.r_b, data.h_b);
-            grid.create_tool_dexel_dyn(data.r_t, data.h_t, data.x_t, data.y_t, data.z_t, 0, 0, 0);
+            grid.create_tool_dexel_dyn(data.r_t, data.h_t, data.x_t, data.y_t, data.z_t, data.x_a_t, data.y_a_t, data.z_a_t);
 
 
             float t_2 = (GLfloat)glfwGetTime();
@@ -446,7 +504,7 @@ int main(void) {
             display(window, glfwGetTime(), grid);
             RenderUI(window, data);
             camera.MoveCamera(window, deltaTime);
-            camera.UpdateMatrix(renderingProgram, renderingProgram_coords);
+            camera.UpdateMatrix(renderingProgram, renderingProgram_coords, renderingProgram_rect);
             glfwSwapBuffers(window);
             glfwPollEvents();
             float t_0 = (GLfloat)glfwGetTime();

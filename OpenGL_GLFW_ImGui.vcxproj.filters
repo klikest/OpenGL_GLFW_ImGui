@@ -148,5 +148,8 @@
     <None Include="coords_frag.glsl">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="rect_vert.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
