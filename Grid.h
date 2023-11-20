@@ -23,6 +23,10 @@ public:
     std::vector<glm::vec4> dexels_blank;
     std::vector<glm::vec4> dexels_tool;
 
+    std::vector<glm::vec4> dexels_tool;
+    std::vector<glm::vec4> dexels_blank;
+
+
     float x_tool=0;
     float y_tool;
     float z_tool;
@@ -44,6 +48,9 @@ public:
     void create_cyl_dexel(int r, int h);
 
     void create_cyl(int r, int h);
+    void create_cyl_dexels(int r, int h);
+    void create_tool_dexels(int r, int h, float dx, float dy, float dz, float x_a, float y_a, float z_a);
+    void draw_dexels();
     void create_tool(int r, int h, float dx, float dy, float dz, float x_a, float y_a, float z_a);
     void create_sphere(int r, float dx, float dy, float dz);
     void bolean_cut();
