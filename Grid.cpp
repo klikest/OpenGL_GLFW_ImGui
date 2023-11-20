@@ -52,6 +52,23 @@ bool Grid::scalar_sphere(float r, float x, float y, float z)
     }
 }
 
+void Grid::create_cyl_dexel(int r, int h)
+{
+    dexels_blank.clear();
+
+    for (int i = r; i < r; i++)
+    {
+        for (int j = -r; j < r; j++)
+        {
+            if (scalar_cyl(r, i, j))
+            {
+                dexels_blank.push_back(glm::vec4(0, i, j, h));
+            }
+        }
+    }
+}
+
+
 void Grid::create_cyl(int r, int h)
 {
     grid_blank.clear();
