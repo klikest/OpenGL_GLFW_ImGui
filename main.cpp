@@ -223,7 +223,7 @@ void setupVertices(void) {
     glVertexAttribDivisor(1, 1);
 
 
-    float l = 60;
+    float l = 10;
     float dl = l / 30;
     float d = l - dl;
     
@@ -319,7 +319,7 @@ void display(GLFWwindow* window, double currentTime, Grid3D grid) {
     glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * grid.grid_draw.size(), grid.grid_draw.data(), GL_STREAM_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * grid.grid_draw.size(), grid.grid_draw.data(), GL_DYNAMIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glEnableVertexAttribArray(1);
@@ -349,6 +349,7 @@ void display(GLFWwindow* window, double currentTime, Grid3D grid) {
     glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
     glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
 
+    glDisable(GL_DEPTH_TEST);
     glEnable(GL_LINE_SMOOTH);
     glDrawArrays(GL_LINES, 0, 6*3);
     
@@ -374,27 +375,26 @@ int main(void) {
     init(window);
     InitUI(window);
     
-    Camera camera(window, glm::vec3(-10.0f, 10.0f, 20.0f), -62, -25);
+    Camera camera(window, glm::vec3(-10.0f, 10.0f, 20.0f), -35, -30);
 
 
-    camera.cameraPos = glm::vec3(-500, 470, 1050);
-    camera.cam_speed = 100;
+    camera.cameraPos = glm::vec3(-60, 50, 52);
+    camera.cam_speed = 200;
 
     UI_Data data;
     data.r_b = 399;
     data.h_b = 499;
-    data.r_t = 5;
+    data.r_t = 2;
     data.x_t = 0;
     data.y_t = 0;
     data.z_t = 0;
-    data.h_t = 5;
+    data.h_t = 1;
 
     Grid3D grid;
     
-    //grid.create_blank_grid(data.r_b, data.h_b);
-    //grid.set_draw();
+
     grid.create_blank_dexel_dyn(data.r_b, data.h_b);
-    //grid.create_tool_dexel(data.r_t, data.h_t, data.x_t, data.y_t, data.z_t, 0, 0, 0);
+    grid.create_tool_dexel_dyn(data.r_t, data.h_t, data.x_t, data.y_t, data.z_t, 0, 0, 0);
 
     grid.grid_dexel_draw_dyn();
     while (!glfwWindowShouldClose(window)) {
@@ -421,9 +421,10 @@ int main(void) {
 
             float t_1 = (GLfloat)glfwGetTime();
             // Генерация точек инструмента
-            //grid.create_blank_grid(data.r_b, data.h_b);
+
             grid.create_blank_dexel_dyn(data.r_b, data.h_b);
-            //grid.create_tool_dexel(data.r_t, data.h_t, data.x_t, data.y_t, data.z_t, 0, 0, 0);
+            grid.create_tool_dexel_dyn(data.r_t, data.h_t, data.x_t, data.y_t, data.z_t, 0, 0, 0);
+
 
             float t_2 = (GLfloat)glfwGetTime();
             // Булева операция

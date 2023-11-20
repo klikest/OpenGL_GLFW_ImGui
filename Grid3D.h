@@ -19,7 +19,12 @@ public:
 	std::vector<glm::vec4> grid_test;
 	std::vector<glm::vec4> grid_draw;
 	std::vector<std::vector<glm::vec2>> dexel_blank;
+	
 	glm::vec2* d_blank_pointer;
+	glm::vec2* d_tool_pointer;
+
+	std::vector < glm::vec4> tool_dexel_cloud;
+	std::vector < glm::vec2> tool_dexel_grid;
 
 
 	std::vector<glm::vec2> dexel_tool;
@@ -32,6 +37,8 @@ public:
 
 	void create_blank_dexel(float r, float h);
 	void create_blank_dexel_dyn(float r, float h);
+	void create_tool_dexel_dyn(float r, float h, float dx, float dy, float dz, float ax, float ay, float az);
+
 	void create_tool_dexel(float r, float h, float dx, float dy, float dz, float ax, float ay, float az);
 
 	void fill_grid_blank(int x_size, int y_size, int z_size);

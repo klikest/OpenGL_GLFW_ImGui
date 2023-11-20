@@ -10,11 +10,11 @@
 
 bool G_code_u = false;
 
-float r_tool;
-float h_tool;
+float r_tool = 10;
+float h_tool = 10;
 
-float r_blank = 400;
-float h_blank = 500;
+float r_blank = 1;
+float h_blank = 1;
 
 float x_t=-100, y_t, z_t, a_x_t, a_y_t, a_z_t;
 
