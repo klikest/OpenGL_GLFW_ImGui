@@ -146,6 +146,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Dexel.cpp" />
     <ClCompile Include="FrameBuffer.cpp" />
     <ClCompile Include="Grid.cpp" />
     <ClCompile Include="Grid3D.cpp" />
@@ -166,6 +167,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Dexel.h" />
     <ClInclude Include="FrameBuffer.h" />
     <ClInclude Include="Grid.h" />
     <ClInclude Include="Grid3D.h" />

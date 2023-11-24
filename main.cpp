@@ -24,7 +24,8 @@
 #include "UI_Data.h"
 #include "Grid.h"
 #include "Grid3D.h"
-//#include "FrameBuffer.h"
+#include "FrameBuffer.h"
+#include "Dexel.h"
 
 using namespace std;
 
@@ -435,6 +436,7 @@ int main(void) {
     init(window);
     InitUI(window);
     
+
     Camera camera(window, glm::vec3(-10.0f, 10.0f, 20.0f), -35, -30);
 
 
@@ -464,11 +466,9 @@ int main(void) {
             data.x_t = get_coord_tool().x;
             data.y_t = get_coord_tool().y;
             data.z_t = get_coord_tool().z;
-
             data.x_a_t = get_angle_tool().x;
             data.y_a_t = get_angle_tool().y;
             data.z_a_t = get_angle_tool().z;
-
             data.r_t = get_tool_and_blank().x;
             data.h_t = get_tool_and_blank().y;
             data.r_b = get_tool_and_blank().z;
@@ -504,7 +504,9 @@ int main(void) {
             deltaTime = currentFrame - lastFrame;
             lastFrame = currentFrame;
             data.delta_time = deltaTime;
+
             display(window, glfwGetTime(), grid);
+
             RenderUI(window, data);
             camera.MoveCamera(window, deltaTime);
             camera.UpdateMatrix(renderingProgram, renderingProgram_coords, renderingProgram_rect);
