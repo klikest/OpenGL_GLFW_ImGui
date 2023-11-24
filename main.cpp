@@ -400,16 +400,19 @@ void display(GLFWwindow* window, double currentTime, Grid3D grid) {
     grid.tool_max_rect.x, grid.tool_min_rect.y, grid.tool_max_rect.z,
 
     grid.tool_min_rect.x, grid.tool_max_rect.y, grid.tool_min_rect.z,
-    grid.tool_max_rect.x, grid.tool_max_rect.y, grid.tool_min_rect.z
+    grid.tool_max_rect.x, grid.tool_max_rect.y, grid.tool_min_rect.z,
+
+    grid.tool_max_rect.x, grid.tool_min_rect.y, grid.tool_min_rect.z,
+    grid.tool_max_rect.x, grid.tool_max_rect.y, grid.tool_min_rect.z,
     };
 
     glUseProgram(renderingProgram_rect);
     glEnableVertexAttribArray(0);// creates VBO and returns the integer ID
     glBindBuffer(GL_ARRAY_BUFFER, vbo[3]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 22*3, rect_lines, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 24*3, rect_lines, GL_DYNAMIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
-    glDrawArrays(GL_LINES, 0, 22);
+    glDrawArrays(GL_LINES, 0, 24);
 
 }
 
