@@ -461,7 +461,6 @@ int main(void) {
     grid.grid_dexel_draw_dyn();
     while (!glfwWindowShouldClose(window)) {
 
-            //draw_rect_data(grid);
 
             data.x_t = get_coord_tool().x;
             data.y_t = get_coord_tool().y;

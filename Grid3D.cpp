@@ -145,11 +145,17 @@ void Grid3D::create_tool_dexel_dyn(float r, float h, float dx, float dy, float d
         }
     }
   
-    updateBbox();
+    //updateBbox();
+
+    tool_min_rect.x -= 1;
+    tool_min_rect.y -= 1;
+
+    tool_max_rect.x += 1;
+    tool_max_rect.y += 1;
 
 
-    X_tool_size = tool_max_rect.x - tool_min_rect.x + 10 ;
-    Y_tool_size = tool_max_rect.y - tool_min_rect.y + 10;
+    X_tool_size = tool_max_rect.x - tool_min_rect.x ;
+    Y_tool_size = tool_max_rect.y - tool_min_rect.y ;
 
     tool_dexel_grid.resize(X_tool_size * Y_tool_size);
     for (int i = 0; i < tool_dexel_grid.size(); i++)
@@ -157,27 +163,42 @@ void Grid3D::create_tool_dexel_dyn(float r, float h, float dx, float dy, float d
         tool_dexel_grid[i] = glm::vec2(100000000, 0);
     }
 
-
     for (int i = 0; i < tool_grid.size(); i++)
     {
         int curr_x = tool_grid[i].x;
         int curr_y = tool_grid[i].y;
-        int curr_z = tool_grid[i].z;
+        int curr_z = tool_grid[i].z - tool_min_rect.z;
 
-        //int curr_z_min = tool_dexel_grid[curr_x + curr_y * X_tool_size].x;
+        int num_curr_dexel = (curr_x - tool_min_rect.x) + X_tool_size * (curr_y - tool_min_rect.y);
 
-        //tool_dexel_grid[curr_x + curr_y * X_tool_size].y += 1; // Каждое попадание в нужную точку сетки увеличивает длину декселя на 1
+        int dexel_min = tool_dexel_grid[num_curr_dexel].x;
 
-        //if (curr_z < curr_z_min)
-        //{
-            //tool_dexel_grid[curr_x + curr_y * X_tool_size].x = curr_z; // Если текущее значение точки меньше начальной точки декселя -> обновить начальную точку декселя
-        //}
+        if (tool_dexel_grid[num_curr_dexel].x == 100000000 && tool_dexel_grid[num_curr_dexel].y == 0)
+        {
+            tool_dexel_grid[num_curr_dexel].x = curr_z;
+            tool_dexel_grid[num_curr_dexel].y = 1;
+        }
 
+        else
+        {
+            int dexel_max = tool_dexel_grid[num_curr_dexel].x + tool_dexel_grid[num_curr_dexel].y;
+
+            if (curr_z < dexel_min)
+            {
+                tool_dexel_grid[num_curr_dexel].x = curr_z;
+                tool_dexel_grid[num_curr_dexel].y += (dexel_min - curr_z);
+            }
+
+            if (curr_z > dexel_max)
+            {
+                tool_dexel_grid[num_curr_dexel].y += curr_z - dexel_max;
+            }
+        }
+
+       
 
     }
  
-
-
 }
 
 
@@ -324,7 +345,7 @@ void Grid3D::grid_dexel_draw_dyn()
     
     for (int i = 0; i < tool_grid.size(); i++)
     {
-        grid_draw.push_back(glm::vec4(tool_grid[i], 1));
+        //grid_draw.push_back(glm::vec4(tool_grid[i], 1));
     }
 
     for (int i = 0; i < tool_dexel_grid.size(); i++)
@@ -332,7 +353,7 @@ void Grid3D::grid_dexel_draw_dyn()
 
         if (tool_dexel_grid[i].y != 0)
         {
-            //grid_draw.push_back(glm::vec4(i % X_tool_size - X_tool_size / 2 , (i / X_tool_size) % Y_tool_size - Y_tool_size / 2 , tool_dexel_grid[i].x, tool_dexel_grid[i].y));
+            grid_draw.push_back(glm::vec4(i % X_tool_size - X_tool_size / 2 + tool_dx , (i / X_tool_size) % Y_tool_size - Y_tool_size / 2 +tool_dy, tool_dexel_grid[i].x + tool_dz, tool_dexel_grid[i].y));
         }
 
     }
