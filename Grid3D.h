@@ -30,6 +30,14 @@ public:
 	glm::vec3 tool_max_rect;
 
 
+	float tool_dx;
+	float tool_dy;
+	float tool_dz;
+
+	float tool_ax;
+	float tool_ay;
+	float tool_az;
+
 	std::vector<glm::vec2> dexel_tool;
 
 	std::vector<glm::vec3> tool_grid;
@@ -37,6 +45,9 @@ public:
 	int X_blank_size, Y_blank_size, Z_blank_size;
 	int X_tool_size, Y_tool_size, Z_tool_size;
 	int X, Y, Z;
+
+	void set_tool_offset(float dx, float dy, float dz, float ax, float ay, float az);
+	void updateBbox();
 
 	void create_blank_dexel(float r, float h);
 	void create_blank_dexel_dyn(float r, float h);

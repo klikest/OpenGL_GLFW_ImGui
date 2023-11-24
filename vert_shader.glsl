@@ -30,7 +30,7 @@ void main(void)
 
     mat4 mv_matrix = v_matrix;  
 
-    gl_Position = vec4(proj_matrix * mv_matrix * vec4(vec3((position.x + aOffset.x)/size, (position.y + aOffset.y)/size, (position.z*aOffset.w + aOffset.z)/size), 1.0));  // right-to-left
+    gl_Position = vec4(proj_matrix * mv_matrix * vec4(vec3((position.x + aOffset.x - 0.5)/size, (position.y + aOffset.y - 0.5)/size, (position.z*aOffset.w + aOffset.z)/size), 1.0));  // right-to-left
     varyingColor = vec4(position, 1.0) * 0.5 + vec4(0.5, 0.5, 0.5, 0.5);
 }
 
