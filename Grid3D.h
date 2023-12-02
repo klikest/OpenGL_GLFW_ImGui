@@ -48,19 +48,12 @@ public:
 
 	void set_tool_offset(float dx, float dy, float dz, float ax, float ay, float az);
 	void updateBbox();
+	void Boolean_op();
 
-	void create_blank_dexel(float r, float h);
 	void create_blank_dexel_dyn(float r, float h);
 	void create_tool_dexel_dyn(float r, float h, float dx, float dy, float dz, float ax, float ay, float az);
 
-	void create_tool_dexel(float r, float h, float dx, float dy, float dz, float ax, float ay, float az);
-
-	void fill_grid_blank(int x_size, int y_size, int z_size);
-	void fill_grid_tool(int x_size, int y_size);
-	void grid_dexel_draw();
 	void grid_dexel_draw_dyn();
-	void set_draw();
-	void create_blank_grid(float r, float h);
 	bool Scalar_cyl(float r, float x, float y);
 	glm::vec4 get_vert_by_num(int i);
 	int get_num_by_vert(glm::vec4 vertex);

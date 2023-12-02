@@ -456,7 +456,7 @@ int main(void) {
     
 
     grid.create_blank_dexel_dyn(data.r_b, data.h_b);
-    //grid.create_tool_dexel_dyn(data.r_t, data.h_t, data.x_t, data.y_t, data.z_t, 0, 0, 0);
+    grid.create_tool_dexel_dyn(data.r_t, data.h_t, data.x_t, data.y_t, data.z_t, 0, 0, 0);
 
     grid.grid_dexel_draw_dyn();
     while (!glfwWindowShouldClose(window)) {
