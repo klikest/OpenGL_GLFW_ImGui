@@ -32,6 +32,9 @@ public:
 	glm::vec3 blank_min_rect;
 	glm::vec3 blank_max_rect;
 
+	glm::vec2 x_inters_d;
+	glm::vec2 y_inters_d;
+
 
 	float tool_dx;
 	float tool_dy;
@@ -51,6 +54,7 @@ public:
 
 	void set_tool_offset(float dx, float dy, float dz, float ax, float ay, float az);
 	void updateBbox();
+	void get_intersection_size();
 	void Boolean_op();
 
 	void create_blank_dexel_dyn(float r, float h);

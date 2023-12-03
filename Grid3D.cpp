@@ -10,39 +10,156 @@
 
 void Grid3D::create_blank_dexel_dyn(float r, float h)
 {
-    if (X_blank_size != 2 * r && Y_blank_size != 2 * r)
+    if (X_blank_size != int((2 * r) + 10) || Z_blank_size != (int)h)
     {
         X_blank_size = (2 * r)+10 ;
         Y_blank_size = (2 * r) + 10;
         delete[] d_blank_pointer;
         d_blank_pointer = nullptr;
         d_blank_pointer = new glm::vec2[X_blank_size * Y_blank_size];
+
+        Z_blank_size = h;
+
+        X_blank_size = (2 * r) + 10;
+        Y_blank_size = (2 * r) + 10;
+
+        blank_min_rect = glm::vec3(-(r + 5), -(r + 5), 0);
+        blank_max_rect = glm::vec3(r + 5, r + 5, h);
+
+        std::vector<int> iter;
+        iter.resize(X_blank_size * Y_blank_size);
+        for (int i = 0; i < X_blank_size * Y_blank_size; i++)
+            iter[i] = i;
+
+        std::for_each(std::execution::par, iter.begin(), iter.end(),
+            [this, r, h](int i)
+            {
+                if (Scalar_cyl(r, i % X_blank_size - X_blank_size / 2, (i / X_blank_size) % Y_blank_size - Y_blank_size / 2))
+                {
+                    d_blank_pointer[i].y = h;
+                    d_blank_pointer[i].x = 0;
+                }
+                else
+                {
+                    d_blank_pointer[i].y = 0;
+                    d_blank_pointer[i].x = 0;
+                }
+            });
     }
-    X_blank_size = (2 * r) + 10;
-    Y_blank_size = (2 * r) + 10;
 
-    blank_min_rect = glm::vec3(-r - 5, -r - 5, 0);
-    blank_min_rect = glm::vec3(r + 5, r + 5, h);
+}
 
-    std::vector<int> iter;
-    iter.resize(X_blank_size * Y_blank_size);
-    for (int i = 0; i < X_blank_size * Y_blank_size; i++)
-        iter[i] = i;
 
-    std::for_each(std::execution::par, iter.begin(), iter.end(),
-        [this, r, h](int i)
-        {
-            if (Scalar_cyl(r, i % X_blank_size - X_blank_size / 2, (i / X_blank_size) % Y_blank_size - Y_blank_size / 2))
-            {
-                d_blank_pointer[i].y = h;
-                d_blank_pointer[i].x = 0;
-            }
-            else
-            {
-                d_blank_pointer[i].y = 0;
-                d_blank_pointer[i].x = 0;
-            }
-        });
+void Grid3D::get_intersection_size()
+{
+
+    //                 X
+
+    //    -----------                   blank
+    //                -----------       tool
+    //               or
+    //                -----------       blank
+    //    -----------                   tool
+    if (tool_min_rect.x > blank_max_rect.x || tool_max_rect.x < blank_min_rect.x) 
+    { 
+        x_inters_d = glm::vec2(0, 0); // X
+    }
+    
+    //    -----------          blank
+    //         --------------  tool
+    else if (tool_min_rect.x > blank_min_rect.x && tool_min_rect.x < blank_max_rect.x && tool_max_rect.x > blank_max_rect.x)
+    {
+        x_inters_d = glm::vec2(tool_min_rect.x, blank_max_rect.x); // X
+    }
+
+    //    -------------        blank
+    //       ------            tool
+    else if (tool_min_rect.x > blank_min_rect.x && tool_min_rect.x < blank_max_rect.x && tool_max_rect.x < blank_max_rect.x)
+    {
+        x_inters_d = glm::vec2(tool_min_rect.x, tool_max_rect.x); // X
+    }
+
+    //         -----------     blank
+    //    -----------          tool
+    else if (blank_min_rect.x > tool_min_rect.x && blank_min_rect.x < tool_max_rect.x && blank_max_rect.x > tool_max_rect.x)
+    {
+        x_inters_d = glm::vec2(blank_min_rect.x, tool_max_rect.x); // X
+    }
+
+    //       -----             blank
+    //    -----------          tool
+    else if (blank_min_rect.x > tool_min_rect.x && blank_min_rect.x < tool_max_rect.x && blank_max_rect.x < tool_max_rect.x)
+    {
+        x_inters_d = glm::vec2(blank_min_rect.x, blank_max_rect.x); // X
+    }
+
+    //    -----------          blank
+    //    -----------          tool
+    else if (blank_min_rect.x == tool_min_rect.x && blank_max_rect.x == tool_max_rect.x)
+    {
+        x_inters_d = glm::vec2(blank_min_rect.x, blank_max_rect.x); // X
+    }
+
+    else
+    {
+        std::cout << "Error compute bbox boolean cut X" << std::endl;
+    }
+
+
+
+    // ---------------------------------------------------
+
+    //               Y
+
+    //    -----------                   blank
+    //                -----------       tool
+    //               or
+    //                -----------       blank
+    //    -----------                   tool
+    if (tool_min_rect.y > blank_max_rect.y || tool_max_rect.y < blank_min_rect.y)
+    {
+        y_inters_d = glm::vec2(0, 0); // Y
+    }
+
+    //    -----------          blank
+    //         --------------  tool
+    else if (tool_min_rect.y > blank_min_rect.y && tool_min_rect.y < blank_max_rect.y && tool_max_rect.y > blank_max_rect.y)
+    {
+        y_inters_d = glm::vec2(tool_min_rect.y, blank_max_rect.y); // Y
+    }
+
+    //    -------------        blank
+    //       ------            tool
+    else if (tool_min_rect.y > blank_min_rect.y && tool_min_rect.y < blank_max_rect.y && tool_max_rect.y < blank_max_rect.y)
+    {
+        y_inters_d = glm::vec2(tool_min_rect.y, tool_max_rect.y); // Y
+    }
+
+    //         -----------     blank
+    //    -----------          tool
+    else if (blank_min_rect.y > tool_min_rect.y && blank_min_rect.y < tool_max_rect.y && blank_max_rect.y > tool_max_rect.y)
+    {
+        y_inters_d = glm::vec2(blank_min_rect.y, tool_max_rect.y); // Y
+    }
+
+    //       -----             blank
+    //    -----------          tool
+    else if (blank_min_rect.y > tool_min_rect.y && blank_min_rect.y < tool_max_rect.y && blank_max_rect.y < tool_max_rect.y)
+    {
+        y_inters_d = glm::vec2(blank_min_rect.y, blank_max_rect.y); // Y
+    }
+
+    //    -----------          blank
+    //    -----------          tool
+    else if (blank_min_rect.y == tool_min_rect.y && blank_max_rect.y == tool_max_rect.y)
+    {
+        y_inters_d = glm::vec2(blank_min_rect.y, blank_max_rect.y); // Y
+    }
+
+    else
+    {
+        std::cout << "Error compute bbox boolean cut Y" << std::endl;
+    }
 
 
 }
@@ -62,32 +179,74 @@ void Grid3D::set_tool_offset(float dx, float dy, float dz, float ax, float ay, f
 
 void Grid3D::Boolean_op()
 {
-    int num_intersection_dexels = 0;
+    get_intersection_size();
 
-    int x_intersection_dexels = 0;
-    int y_intersection_dexels = 0;
+    int num_x_intersection_dexels = x_inters_d.y - x_inters_d.x;
+    int num_y_intersection_dexels = y_inters_d.y - y_inters_d.x;
     
-    if (blank_min_rect.x < tool_min_rect.x && blank_max_rect.x < tool_max_rect.x)
+    int num_inters = num_x_intersection_dexels * num_y_intersection_dexels;
+
+    std::vector<int> iter_blank_mass;
+    std::vector<int> iter_tool_mass;
+
+    int len_x = x_inters_d.y - x_inters_d.x;
+    int len_y = y_inters_d.y - y_inters_d.x;
+
+    int num_x_start_blank = x_inters_d.x - blank_min_rect.x;
+    int num_y_start_blank = y_inters_d.x - blank_min_rect.y;
+    int i_start_blank = num_x_start_blank + X_blank_size * num_y_start_blank;
+
+    for (int i = 0; i < len_y; i++)
     {
-        x_intersection_dexels = blank_max_rect.x = tool_min_rect.x;
+        int iter_blank = i_start_blank + X_blank_size * i;
+
+        for (int j = 0; j < len_x; j++)
+        {
+            iter_blank_mass.push_back(iter_blank);
+            iter_blank += 1;
+        }    
     }
 
-    if (blank_min_rect.x > tool_min_rect.x && blank_max_rect.x > tool_max_rect.x && tool_max_rect.x > blank_min_rect.x)
+    int num_x_start_tool = x_inters_d.x - tool_min_rect.x;
+    int num_y_start_tool = y_inters_d.x - tool_min_rect.y;
+    int i_start_tool = num_x_start_tool + X_tool_size * num_y_start_tool;
+
+    for (int i = 0; i < len_y; i++)
     {
-        x_intersection_dexels = blank_max_rect.x = tool_min_rect.x;
+        int iter_tool = i_start_tool + X_tool_size * i;
+
+        for (int j = 0; j < len_x; j++)
+        {
+            iter_tool_mass.push_back(iter_tool);
+            iter_tool += 1;
+        }
     }
 
-    if (blank_min_rect.x < tool_min_rect.x && blank_max_rect.x < tool_max_rect.x)
+
+    for (int i = 0; i < iter_blank_mass.size(); i++)
     {
-        x_intersection_dexels = blank_max_rect.x = tool_min_rect.x;
+
+        if (tool_dexel_grid[iter_tool_mass[i]].y != 0 && d_blank_pointer[iter_blank_mass[i]].y != 0 && d_blank_pointer[iter_blank_mass[i]].y > tool_min_rect.z + tool_dexel_grid[iter_tool_mass[i]].x)
+        {
+            if (tool_min_rect.z + tool_dexel_grid[iter_tool_mass[i]].x <= 0)
+            {
+                d_blank_pointer[iter_blank_mass[i]].y = 0;
+            }
+            else
+            {
+                d_blank_pointer[iter_blank_mass[i]].y = tool_min_rect.z + tool_dexel_grid[iter_tool_mass[i]].x;
+            }
+        }
+
     }
 
-    if (blank_min_rect.x < tool_min_rect.x && blank_max_rect.x < tool_max_rect.x)
-    {
-        x_intersection_dexels = blank_max_rect.x = tool_min_rect.x;
-    }
 
-}
+    //std::cout << iter_tool_mass[0] << std::endl;
+
+    //std::cout << "X0 = " << x_inters_d.x << " X1 = " << x_inters_d.y << std::endl;
+    //std::cout << "Y0 = " << y_inters_d.x << " Y1 = " << y_inters_d.y << std::endl;
+    //std::cout << " " << std::endl;
+ }
 
 
 
@@ -239,7 +398,7 @@ void Grid3D::grid_dexel_draw_dyn()
     grid_draw.clear();
     
     for (int j = 0; j < X_blank_size * Y_blank_size; j++)
-    {
+    {   /*
         if (d_blank_pointer[j].y != 0)
         {
             if ( (j> X_blank_size && j <(X_blank_size * Y_blank_size)- X_blank_size)
@@ -261,7 +420,11 @@ void Grid3D::grid_dexel_draw_dyn()
             }
 
         }
-
+        */
+        if (d_blank_pointer[j].y != 0)
+        {
+            grid_draw.push_back(glm::vec4(j % X_blank_size - X_blank_size / 2, (j / X_blank_size) % Y_blank_size - Y_blank_size / 2, d_blank_pointer[j].x, d_blank_pointer[j].y));
+        }
     }
     
     for (int i = 0; i < tool_grid.size(); i++)
