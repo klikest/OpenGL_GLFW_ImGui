@@ -29,6 +29,9 @@ public:
 	glm::vec3 tool_min_rect;
 	glm::vec3 tool_max_rect;
 
+	glm::vec3 blank_min_rect;
+	glm::vec3 blank_max_rect;
+
 
 	float tool_dx;
 	float tool_dy;

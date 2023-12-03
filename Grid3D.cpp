@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <execution>
 #include "UI_Data.h"
+#include <GLFW/glfw3.h>
 
 
 void Grid3D::create_blank_dexel_dyn(float r, float h)
@@ -19,6 +20,9 @@ void Grid3D::create_blank_dexel_dyn(float r, float h)
     }
     X_blank_size = (2 * r) + 10;
     Y_blank_size = (2 * r) + 10;
+
+    blank_min_rect = glm::vec3(-r - 5, -r - 5, 0);
+    blank_min_rect = glm::vec3(r + 5, r + 5, h);
 
     std::vector<int> iter;
     iter.resize(X_blank_size * Y_blank_size);
@@ -58,6 +62,30 @@ void Grid3D::set_tool_offset(float dx, float dy, float dz, float ax, float ay, f
 
 void Grid3D::Boolean_op()
 {
+    int num_intersection_dexels = 0;
+
+    int x_intersection_dexels = 0;
+    int y_intersection_dexels = 0;
+    
+    if (blank_min_rect.x < tool_min_rect.x && blank_max_rect.x < tool_max_rect.x)
+    {
+        x_intersection_dexels = blank_max_rect.x = tool_min_rect.x;
+    }
+
+    if (blank_min_rect.x > tool_min_rect.x && blank_max_rect.x > tool_max_rect.x && tool_max_rect.x > blank_min_rect.x)
+    {
+        x_intersection_dexels = blank_max_rect.x = tool_min_rect.x;
+    }
+
+    if (blank_min_rect.x < tool_min_rect.x && blank_max_rect.x < tool_max_rect.x)
+    {
+        x_intersection_dexels = blank_max_rect.x = tool_min_rect.x;
+    }
+
+    if (blank_min_rect.x < tool_min_rect.x && blank_max_rect.x < tool_max_rect.x)
+    {
+        x_intersection_dexels = blank_max_rect.x = tool_min_rect.x;
+    }
 
 }
 
@@ -78,6 +106,8 @@ void Grid3D::updateBbox()
 void Grid3D::create_tool_dexel_dyn(float r, float h, float dx, float dy, float dz, float ax, float ay, float az)
 {
 
+    float t_0 = (GLfloat)glfwGetTime();
+
     tool_min_rect = glm::vec3(1000000, 1000000, 1000000);
     tool_max_rect = glm::vec3(-1000000, -1000000, -1000000);
 
@@ -87,11 +117,13 @@ void Grid3D::create_tool_dexel_dyn(float r, float h, float dx, float dy, float d
     tool_grid.clear();
 
 
-    for (float i = -r; i <= r; i += 0.5)
+    float t_1 = (GLfloat)glfwGetTime();
+
+    for (float i = -r; i <= r; i += 1)
     {
-        for (float j = -r; j <= r; j += 0.5)
+        for (float j = -r; j <= r; j += 1)
         {
-            for (float k = 0; k < h; k += 0.5)
+            for (float k = 0; k < h; k += 1)
             {
                 if (Scalar_cyl(r, i, j))
                 {
@@ -133,6 +165,8 @@ void Grid3D::create_tool_dexel_dyn(float r, float h, float dx, float dy, float d
     }
   
 
+    float t_2 = (GLfloat)glfwGetTime();
+
     tool_min_rect.x -= 1;
     tool_min_rect.y -= 1;
 
@@ -145,6 +179,7 @@ void Grid3D::create_tool_dexel_dyn(float r, float h, float dx, float dy, float d
 
     tool_dexel_grid.resize(X_tool_size * Y_tool_size);
 
+    float t_3 = (GLfloat)glfwGetTime();
 
     for (int i = 0; i < X_tool_size * Y_tool_size; i++)
     {
@@ -186,7 +221,15 @@ void Grid3D::create_tool_dexel_dyn(float r, float h, float dx, float dy, float d
        
 
     }
- 
+
+    float t_4 = (GLfloat)glfwGetTime();
+    /*
+    std::cout << " " << std::endl;
+    std::cout << "t1 = " << t_1 - t_0 << std::endl;
+    std::cout << "t2 = " << t_2 - t_1 << std::endl;
+    std::cout << "t3 = " << t_3 - t_2 << std::endl;
+    std::cout << "t4 = " << t_4 - t_3 << std::endl;
+    */
 }
 
 

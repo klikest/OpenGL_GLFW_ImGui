@@ -437,10 +437,10 @@ int main(void) {
     InitUI(window);
     
 
-    Camera camera(window, glm::vec3(-10.0f, 10.0f, 20.0f), -35, -30);
+    Camera camera(window, glm::vec3(-150.0f, 170.0f, 165.0f), -41, -31);
 
 
-    camera.cameraPos = glm::vec3(-60, 50, 52);
+    camera.cameraPos = glm::vec3(-150.0f, 170.0f, 165.0f);
     camera.cam_speed = 100;
 
     UI_Data data;

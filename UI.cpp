@@ -10,13 +10,13 @@
 
 bool G_code_u = false;
 
-float r_tool = 10;
-float h_tool = 10;
+float r_tool = 50;
+float h_tool = 20;
 
-float r_blank = 1;
-float h_blank = 1;
+float r_blank = 30;
+float h_blank = 100;
 
-float x_t=0, y_t=0, z_t=0, a_x_t=0, a_y_t=0, a_z_t=0;
+float x_t=0, y_t=90, z_t=0, a_x_t=0, a_y_t=0, a_z_t=0;
 
 void InitUI(GLFWwindow* window)
 {
@@ -110,11 +110,11 @@ void RenderUI(GLFWwindow* window, UI_Data data)
 	//ImGui::Text(t_z.c_str());
 	ImGui::SliderFloat("R tool", &r_tool, 1.0f, 100.0f);
 	ImGui::SliderFloat("H tool", &h_tool, 1.0f, 100.0f);
-	ImGui::SliderFloat("R blank", &r_blank, 1.0f, 1000.0f);
-	ImGui::SliderFloat("H blank", &h_blank, 1.0f, 1000.0f);
-	ImGui::SliderFloat("X", &x_t, -100.0f, 100.0f);
-	ImGui::SliderFloat("Y", &y_t, -100.0f, 100.0f);
-	ImGui::SliderFloat("Z", &z_t, -100.0f, 100.0f);
+	ImGui::SliderFloat("R blank", &r_blank, 1.0f, 100.0f);
+	ImGui::SliderFloat("H blank", &h_blank, 1.0f, 500.0f);
+	ImGui::SliderFloat("X", &x_t, -500.0f, 500.0f);
+	ImGui::SliderFloat("Y", &y_t, -500.0f, 500.0f);
+	ImGui::SliderFloat("Z", &z_t, -500.0f, 500.0f);
 	ImGui::SliderFloat("A", &a_x_t, -360.0f, 360.0f);
 	ImGui::SliderFloat("B", &a_y_t, -360.0f, 360.0f);
 	ImGui::SliderFloat("C", &a_z_t, -360.0f, 360.0f);
