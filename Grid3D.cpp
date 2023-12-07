@@ -8,15 +8,47 @@
 #include <GLFW/glfw3.h>
 
 
+bool Scalar_cyl(float r, float x, float y)
+{
+    if ((x * x) + (y * y) <= (r * r))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 void Grid3D::create_blank_dexel_dyn(float r, float h)
 {
-    if (X_blank_size != int((2 * r) + 10) || Z_blank_size != (int)h)
+    bool start = true;
+    if (X_blank_size != int((2 * r) + 10) || Z_blank_size != (int)h )
     {
+        if (!start)
+        {
+            for (int i = 0; i < sizeof(d_layers_blank_pointer) / sizeof(glm::vec2); i++)
+            {
+                delete[] d_layers_blank_pointer[i];
+                d_layers_blank_pointer[i] = nullptr;
+            }
+
+            delete[] d_layers_blank_pointer;
+            d_layers_blank_pointer = nullptr;
+        }
+
+
+
+
         X_blank_size = (2 * r)+10 ;
         Y_blank_size = (2 * r) + 10;
-        delete[] d_blank_pointer;
-        d_blank_pointer = nullptr;
-        d_blank_pointer = new glm::vec2[X_blank_size * Y_blank_size];
+        //delete[] d_blank_pointer;
+        //d_blank_pointer = nullptr;
+        //d_blank_pointer = new glm::vec2[X_blank_size * Y_blank_size];
+        
+
+        d_layers_blank_pointer = new glm::vec2*[X_blank_size * Y_blank_size];
+
 
         Z_blank_size = h;
 
@@ -25,27 +57,33 @@ void Grid3D::create_blank_dexel_dyn(float r, float h)
 
         blank_min_rect = glm::vec3(-(r + 5), -(r + 5), 0);
         blank_max_rect = glm::vec3(r + 5, r + 5, h);
-
+        
         std::vector<int> iter;
         iter.resize(X_blank_size * Y_blank_size);
+
         for (int i = 0; i < X_blank_size * Y_blank_size; i++)
+        {
             iter[i] = i;
+        }
 
         std::for_each(std::execution::par, iter.begin(), iter.end(),
             [this, r, h](int i)
             {
+                d_layers_blank_pointer[i] = new glm::vec2[1];
+
                 if (Scalar_cyl(r, i % X_blank_size - X_blank_size / 2, (i / X_blank_size) % Y_blank_size - Y_blank_size / 2))
                 {
-                    d_blank_pointer[i].y = h;
-                    d_blank_pointer[i].x = 0;
+                    d_layers_blank_pointer[i][0] = glm::vec2(0, h);
                 }
                 else
                 {
-                    d_blank_pointer[i].y = 0;
-                    d_blank_pointer[i].x = 0;
+                    d_layers_blank_pointer[i][0] = glm::vec2(0, 0);
                 }
             });
-    }
+
+        start = false;
+
+    }   
 
 }
 
@@ -226,15 +264,18 @@ void Grid3D::Boolean_op()
     for (int i = 0; i < iter_blank_mass.size(); i++)
     {
 
-        if (tool_dexel_grid[iter_tool_mass[i]].y != 0 && d_blank_pointer[iter_blank_mass[i]].y != 0 && d_blank_pointer[iter_blank_mass[i]].y > tool_min_rect.z + tool_dexel_grid[iter_tool_mass[i]].x)
+        for (int l_num_of_dexel = 0; l_num_of_dexel < sizeof(d_layers_blank_pointer[iter_blank_mass[i]])/sizeof(glm::vec2); l_num_of_dexel++)
         {
-            if (tool_min_rect.z + tool_dexel_grid[iter_tool_mass[i]].x <= 0)
+            if (tool_dexel_grid[iter_tool_mass[i]].y != 0 && d_layers_blank_pointer[iter_blank_mass[i]][l_num_of_dexel].y != 0 && d_layers_blank_pointer[iter_blank_mass[i]][l_num_of_dexel].y > tool_min_rect.z + tool_dexel_grid[iter_tool_mass[i]].x)
             {
-                d_blank_pointer[iter_blank_mass[i]].y = 0;
-            }
-            else
-            {
-                d_blank_pointer[iter_blank_mass[i]].y = tool_min_rect.z + tool_dexel_grid[iter_tool_mass[i]].x;
+                if (tool_min_rect.z + tool_dexel_grid[iter_tool_mass[i]].x <= 0)
+                {
+                    d_layers_blank_pointer[iter_blank_mass[i]][l_num_of_dexel].y = 0;
+                }
+                else
+                {
+                    d_layers_blank_pointer[iter_blank_mass[i]][l_num_of_dexel].y = tool_min_rect.z + tool_dexel_grid[iter_tool_mass[i]].x;
+                }
             }
         }
 
@@ -260,71 +301,67 @@ void Grid3D::updateBbox()
     tool_max_rect.z += 1;
 }
 
-
-
-void Grid3D::create_tool_dexel_dyn(float r, float h, float dx, float dy, float dz, float ax, float ay, float az)
+void Grid3D::get_tool_bbox()
 {
-
-    float t_0 = (GLfloat)glfwGetTime();
-
     tool_min_rect = glm::vec3(1000000, 1000000, 1000000);
     tool_max_rect = glm::vec3(-1000000, -1000000, -1000000);
 
-
-    set_tool_offset(dx, dy, dz, ax, ay, az);
-
-    tool_grid.clear();
-
-
-    float t_1 = (GLfloat)glfwGetTime();
-
-    for (float i = -r; i <= r; i += 1)
+    for (float i = 0; i < 6.3; i += 0.2)
     {
-        for (float j = -r; j <= r; j += 1)
-        {
-            for (float k = 0; k < h; k += 1)
-            {
-                if (Scalar_cyl(r, i, j))
-                {
+        glm::vec4 coords_0 = glm::vec4(tool_r * sin(i), tool_r * cos(i), 0, 1.0f);
 
-                    glm::vec4 coords_0 = glm::vec4(i, j, k, 1.0f);
+        glm::mat4 trans_y = glm::mat4(1.0f);
+        trans_y = glm::rotate(trans_y, glm::radians(tool_ax), glm::vec3(1.0f, 0.0f, 0.0f));
+        glm::vec4 coords__ = trans_y * glm::vec4(coords_0.x, coords_0.y, coords_0.z, 1.0f);
 
-                    glm::mat4 trans_y = glm::mat4(1.0f);
-                    trans_y = glm::rotate(trans_y, glm::radians(ax), glm::vec3(1.0f, 0.0f, 0.0f));
-                    glm::vec4 coords__ = trans_y * glm::vec4(coords_0.x, coords_0.y, coords_0.z, 1.0f);
+        glm::mat4 trans_x = glm::mat4(1.0f);
+        trans_x = glm::rotate(trans_x, glm::radians(tool_ay), glm::vec3(0.0f, 1.0f, 0.0f));
+        glm::vec4 coords_ = trans_x * coords__;
 
-                    glm::mat4 trans_x = glm::mat4(1.0f);
-                    trans_x = glm::rotate(trans_x, glm::radians(ay), glm::vec3(0.0f, 1.0f, 0.0f));
-                    glm::vec4 coords_ = trans_x * coords__;
-
-                    glm::mat4 trans_z = glm::mat4(1.0f);
-                    trans_z = glm::rotate(trans_z, glm::radians(az), glm::vec3(0.0f, 0.0f, 1.0f));
-                    glm::vec4 coords = trans_z * (coords_ + glm::vec4(dx, dy, dz, 0));
+        glm::mat4 trans_z = glm::mat4(1.0f);
+        trans_z = glm::rotate(trans_z, glm::radians(tool_az), glm::vec3(0.0f, 0.0f, 1.0f));
+        glm::vec4 coords = trans_z * (coords_ + glm::vec4(tool_dx, tool_dy, tool_dz, 0));
 
 
 
-                    glm::vec3 new_point = glm::vec3(round(coords.x), round(coords.y), round(coords.z ));
+        glm::vec3 new_point = glm::vec3(round(coords.x), round(coords.y), round(coords.z));
 
-
-
-                    if (tool_min_rect.x > new_point.x) { tool_min_rect.x = new_point.x; }
-                    if (tool_max_rect.x < new_point.x) { tool_max_rect.x = new_point.x; }
-                    if (tool_min_rect.y > new_point.y) { tool_min_rect.y = new_point.y; }
-                    if (tool_max_rect.y < new_point.y) { tool_max_rect.y = new_point.y; }
-                    if (tool_min_rect.z > new_point.z) { tool_min_rect.z = new_point.z; }
-                    if (tool_max_rect.z < new_point.z) { tool_max_rect.z = new_point.z; }
-
-
-                    tool_grid.push_back(new_point);
-
-                }
-
-            }
-        }
+        if (tool_min_rect.x > new_point.x) { tool_min_rect.x = new_point.x; }
+        if (tool_max_rect.x < new_point.x) { tool_max_rect.x = new_point.x; }
+        if (tool_min_rect.y > new_point.y) { tool_min_rect.y = new_point.y; }
+        if (tool_max_rect.y < new_point.y) { tool_max_rect.y = new_point.y; }
+        if (tool_min_rect.z > new_point.z) { tool_min_rect.z = new_point.z; }
+        if (tool_max_rect.z < new_point.z) { tool_max_rect.z = new_point.z; }
     }
-  
 
-    float t_2 = (GLfloat)glfwGetTime();
+    for (float i = 0; i < 6.3; i += 0.2)
+    {
+        glm::vec4 coords_0 = glm::vec4(tool_r * sin(i), tool_r * cos(i), tool_h, 1.0f);
+
+        glm::mat4 trans_y = glm::mat4(1.0f);
+        trans_y = glm::rotate(trans_y, glm::radians(tool_ax), glm::vec3(1.0f, 0.0f, 0.0f));
+        glm::vec4 coords__ = trans_y * glm::vec4(coords_0.x, coords_0.y, coords_0.z, 1.0f);
+
+        glm::mat4 trans_x = glm::mat4(1.0f);
+        trans_x = glm::rotate(trans_x, glm::radians(tool_ay), glm::vec3(0.0f, 1.0f, 0.0f));
+        glm::vec4 coords_ = trans_x * coords__;
+
+        glm::mat4 trans_z = glm::mat4(1.0f);
+        trans_z = glm::rotate(trans_z, glm::radians(tool_az), glm::vec3(0.0f, 0.0f, 1.0f));
+        glm::vec4 coords = trans_z * (coords_ + glm::vec4(tool_dx, tool_dy, tool_dz, 0));
+
+
+
+        glm::vec3 new_point = glm::vec3(round(coords.x), round(coords.y), round(coords.z));
+
+        if (tool_min_rect.x > new_point.x) { tool_min_rect.x = new_point.x; }
+        if (tool_max_rect.x < new_point.x) { tool_max_rect.x = new_point.x; }
+        if (tool_min_rect.y > new_point.y) { tool_min_rect.y = new_point.y; }
+        if (tool_max_rect.y < new_point.y) { tool_max_rect.y = new_point.y; }
+        if (tool_min_rect.z > new_point.z) { tool_min_rect.z = new_point.z; }
+        if (tool_max_rect.z < new_point.z) { tool_max_rect.z = new_point.z; }
+    }
+
 
     tool_min_rect.x -= 1;
     tool_min_rect.y -= 1;
@@ -333,62 +370,116 @@ void Grid3D::create_tool_dexel_dyn(float r, float h, float dx, float dy, float d
     tool_max_rect.y += 1;
 
 
-    X_tool_size = tool_max_rect.x - tool_min_rect.x ;
-    Y_tool_size = tool_max_rect.y - tool_min_rect.y ;
+    X_tool_size = tool_max_rect.x - tool_min_rect.x;
+    Y_tool_size = tool_max_rect.y - tool_min_rect.y;
+    Z_tool_size = tool_max_rect.z - tool_min_rect.z;
+}
 
-    tool_dexel_grid.resize(X_tool_size * Y_tool_size);
+void Grid3D::create_tool_dexel_dyn(float r, float h, float dx, float dy, float dz, float ax, float ay, float az)
+{
+    set_tool_offset(dx, dy, dz, ax, ay, az);
+    tool_r = r;
+    tool_h = h;
 
-    float t_3 = (GLfloat)glfwGetTime();
+    get_tool_bbox();
 
-    for (int i = 0; i < X_tool_size * Y_tool_size; i++)
+
+
+    //d_layers_tool_pointer = new bool* [X_tool_size * Y_tool_size];
+
+    //for (int i = 0; i < sizeof(d_layers_tool_pointer) / sizeof(bool); i++)
+    //{
+    //    if (d_layers_tool_pointer != nullptr)
+    //    {
+            //delete[] d_layers_tool_pointer[i];
+            //d_layers_tool_pointer[i] = nullptr;
+    //    }
+    //}
+    //delete[] d_layers_tool_pointer;
+    //d_layers_tool_pointer = nullptr;
+
+
+    std::vector<std::vector<bool>> test;
+
+
+    for (int n = 0; n < X_tool_size * Y_tool_size; n++)
     {
-        tool_dexel_grid[i] = glm::vec2(100000000, 0);
-    }
+        std::vector<bool> layer;
+        layer.clear();
 
-    for (int i = 0; i < tool_grid.size(); i++)
-    {
-        int curr_x = tool_grid[i].x;
-        int curr_y = tool_grid[i].y;
-        int curr_z = tool_grid[i].z - tool_min_rect.z;
-
-        int num_curr_dexel = (curr_x - tool_min_rect.x) + X_tool_size * (curr_y - tool_min_rect.y);
-
-        int dexel_min = tool_dexel_grid[num_curr_dexel].x;
-
-        if (tool_dexel_grid[num_curr_dexel].x == 100000000 && tool_dexel_grid[num_curr_dexel].y == 0)
+        for (int z = 0; z < Z_tool_size; z++)
         {
-            tool_dexel_grid[num_curr_dexel].x = curr_z;
-            tool_dexel_grid[num_curr_dexel].y = 1;
-        }
+            float curr_x = n % X_tool_size - X_tool_size/2;
+            float curr_y = (n / X_tool_size) % Y_tool_size - Y_tool_size/2;
+            float curr_z = (float)z;
 
-        else
-        {
-            int dexel_max = tool_dexel_grid[num_curr_dexel].x + tool_dexel_grid[num_curr_dexel].y;
+            glm::vec4 coords_ = glm::vec4(curr_x, curr_y, curr_z, 1.0f);
 
-            if (curr_z < dexel_min)
+            glm::mat4 trans_z = glm::mat4(1.0f);
+            trans_z = glm::rotate(trans_z, glm::radians(-tool_az), glm::vec3(0.0f, 0.0f, 1.0f));
+            glm::vec4 coords = trans_z * (coords_);
+
+            glm::mat4 trans_x = glm::mat4(1.0f);
+            trans_x = glm::rotate(trans_x, glm::radians(-tool_ay), glm::vec3(0.0f, 1.0f, 0.0f));
+            glm::vec4 coords__ = trans_x * coords;
+
+            glm::mat4 trans_y = glm::mat4(1.0f);
+            trans_y = glm::rotate(trans_y, glm::radians(-tool_ax), glm::vec3(1.0f, 0.0f, 0.0f));
+            glm::vec4 coords___ = trans_y * coords__;
+
+            //std::cout << "X = " << coords___.x << std::endl;
+            //std::cout << "Y = " << coords___.y << std::endl;
+            //std::cout << "Z = " << coords___.z << std::endl;
+            //std::cout << " " << std::endl;
+
+            if (Scalar_cyl(r, coords___.x, coords___.y))
             {
-                tool_dexel_grid[num_curr_dexel].x = curr_z;
-                tool_dexel_grid[num_curr_dexel].y += (dexel_min - curr_z);
+                layer.push_back(true);
+            }
+            else
+            {
+                layer.push_back(false);
             }
 
-            if (curr_z > dexel_max)
+
+        }
+        test.push_back(layer);
+    }
+
+    delete[] d_tool_pointer;
+    d_tool_pointer = nullptr;
+    d_tool_pointer = new glm::vec2[X_tool_size * Y_tool_size];
+
+
+    for (int n = 0; n < X_tool_size * Y_tool_size; n++)
+    {
+        int z0 = 0;
+        int z1 = 0;
+
+        int z = 0;
+
+        for (int i = 0; i < Z_tool_size; i++)
+        {
+            if (test[n][i])
             {
-                tool_dexel_grid[num_curr_dexel].y += curr_z - dexel_max;
+                z0 = i;
+                i += Z_tool_size;
             }
         }
 
-       
+        for (int i = Z_tool_size; i << Z_tool_size >  0; i--)
+        {
+            if (test[n][i])
+            {
+                z1 = i;
+                i -= Z_tool_size;
+            }
+        }
+
+        d_tool_pointer[n] = glm::vec2(z0, z1-z0);
 
     }
 
-    float t_4 = (GLfloat)glfwGetTime();
-    /*
-    std::cout << " " << std::endl;
-    std::cout << "t1 = " << t_1 - t_0 << std::endl;
-    std::cout << "t2 = " << t_2 - t_1 << std::endl;
-    std::cout << "t3 = " << t_3 - t_2 << std::endl;
-    std::cout << "t4 = " << t_4 - t_3 << std::endl;
-    */
 }
 
 
@@ -421,55 +512,31 @@ void Grid3D::grid_dexel_draw_dyn()
 
         }
         */
-        if (d_blank_pointer[j].y != 0)
+        for (int num = 0; num < sizeof(d_layers_blank_pointer[j]) / sizeof(glm::vec2); num++)
         {
-            grid_draw.push_back(glm::vec4(j % X_blank_size - X_blank_size / 2, (j / X_blank_size) % Y_blank_size - Y_blank_size / 2, d_blank_pointer[j].x, d_blank_pointer[j].y));
+            if (d_layers_blank_pointer[j][num].y != 0)
+            {
+                //grid_draw.push_back(glm::vec4(j % X_blank_size - X_blank_size / 2, (j / X_blank_size) % Y_blank_size - Y_blank_size / 2, d_layers_blank_pointer[j][num].x, d_layers_blank_pointer[j][num].y));
+            }
         }
     }
-    
-    for (int i = 0; i < tool_grid.size(); i++)
-    {
-        //grid_draw.push_back(glm::vec4(tool_grid[i], 1));
-    }
 
-    for (int i = 0; i < tool_dexel_grid.size(); i++)
-    {
+    for (int j = 0; j < X_tool_size * Y_tool_size; j++)
+    {  
 
-        if (tool_dexel_grid[i].y != 0)
+        if (d_tool_pointer[j].y != 0)
         {
-            grid_draw.push_back(glm::vec4(i % X_tool_size - X_tool_size  + tool_min_rect.x + X_tool_size, (i / X_tool_size) % Y_tool_size - Y_tool_size  + tool_min_rect.y + Y_tool_size, tool_dexel_grid[i].x + tool_min_rect.z, tool_dexel_grid[i].y));
+            grid_draw.push_back(glm::vec4(j % X_tool_size + tool_min_rect.x + 0.5, (j / X_tool_size) % Y_tool_size + tool_min_rect.y + 0.5, d_tool_pointer[j].x + tool_min_rect.z, d_tool_pointer[j].y));
         }
-
     }
 
 }
 
 
 
-bool Grid3D::Scalar_cyl(float r, float x, float y)
-{
-    if ((x * x) + (y * y) <= (r * r))
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
 
 
 
 
 
-glm::vec4 Grid3D::get_vert_by_num(int i)
-{
-    return glm::vec4(i % X, (i / X) % Y, i / (X * Y), 1);
-}
-
-
-int Grid3D::get_num_by_vert(glm::vec4 vertex)
-{
-    return vertex.x + vertex.y * X + vertex.z * X * Y;
-}
 

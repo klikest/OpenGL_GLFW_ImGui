@@ -22,6 +22,8 @@ public:
 	
 	glm::vec2* d_blank_pointer;
 	glm::vec2* d_tool_pointer;
+	glm::vec2** d_layers_blank_pointer;
+	bool** d_layers_tool_pointer;
 
 	std::vector < glm::vec4> tool_dexel_cloud;
 	std::vector < glm::vec2> tool_dexel_grid;
@@ -44,6 +46,9 @@ public:
 	float tool_ay;
 	float tool_az;
 
+	float tool_h;
+	float tool_r;
+
 	std::vector<glm::vec2> dexel_tool;
 
 	std::vector<glm::vec3> tool_grid;
@@ -57,13 +62,14 @@ public:
 	void get_intersection_size();
 	void Boolean_op();
 
+	void get_tool_bbox();
 	void create_blank_dexel_dyn(float r, float h);
+	void create_blank_dexel(float r, float h);
 	void create_tool_dexel_dyn(float r, float h, float dx, float dy, float dz, float ax, float ay, float az);
 
 	void grid_dexel_draw_dyn();
-	bool Scalar_cyl(float r, float x, float y);
-	glm::vec4 get_vert_by_num(int i);
-	int get_num_by_vert(glm::vec4 vertex);
+	//bool Scalar_cyl(float r, float x, float y);
+
 
 };
 

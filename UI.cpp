@@ -10,13 +10,13 @@
 
 bool G_code_u = false;
 
-float r_tool = 29;
-float h_tool = 10;
+float r_tool = 1;
+float h_tool = 1;
 
 float r_blank = 30;
 float h_blank = 60;
 
-float x_t=-60, y_t=0, z_t=15, a_x_t=0, a_y_t=0, a_z_t=0;
+float x_t=-0, y_t=0, z_t=0, a_x_t=0, a_y_t=0, a_z_t=0;
 
 void InitUI(GLFWwindow* window)
 {

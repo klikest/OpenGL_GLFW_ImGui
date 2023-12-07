@@ -413,7 +413,7 @@ void display(GLFWwindow* window, double currentTime, Grid3D grid) {
     glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 24*3, rect_lines, GL_DYNAMIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
-    //glDrawArrays(GL_LINES, 0, 24);
+    glDrawArrays(GL_LINES, 0, 24);
 
 }
 
@@ -489,7 +489,8 @@ int main(void) {
             float t_2 = (GLfloat)glfwGetTime();
             // Булева операция
             //grid.set_draw();
-            grid.Boolean_op();
+            // 
+            //grid.Boolean_op();
             grid.grid_dexel_draw_dyn();
 
             float t_3 = (GLfloat)glfwGetTime();
