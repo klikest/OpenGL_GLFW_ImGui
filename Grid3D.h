@@ -49,6 +49,8 @@ public:
 	float tool_h;
 	float tool_r;
 
+	float offcenter = 50;
+
 	std::vector<glm::vec2> dexel_tool;
 
 	std::vector<glm::vec3> tool_grid;

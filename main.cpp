@@ -368,43 +368,44 @@ void display(GLFWwindow* window, double currentTime, Grid3D grid) {
     glEnable(GL_LINE_SMOOTH);
     glDrawArrays(GL_LINES, 0, 6*3);
     
+    float grid_size = get_grid_size();
 
     float rect_lines[] = {
-    grid.tool_min_rect.x, grid.tool_min_rect.y, grid.tool_min_rect.z,
-    grid.tool_max_rect.x, grid.tool_min_rect.y, grid.tool_min_rect.z,
+    grid.tool_min_rect.x * grid_size, grid.tool_min_rect.y* grid_size, grid.tool_min_rect.z* grid_size,
+    grid.tool_max_rect.x* grid_size, grid.tool_min_rect.y* grid_size, grid.tool_min_rect.z* grid_size,
 
-    grid.tool_min_rect.x, grid.tool_min_rect.y, grid.tool_min_rect.z,
-    grid.tool_min_rect.x, grid.tool_max_rect.y, grid.tool_min_rect.z,
+    grid.tool_min_rect.x* grid_size, grid.tool_min_rect.y* grid_size, grid.tool_min_rect.z* grid_size,
+    grid.tool_min_rect.x* grid_size, grid.tool_max_rect.y* grid_size, grid.tool_min_rect.z* grid_size,
 
-    grid.tool_min_rect.x, grid.tool_min_rect.y, grid.tool_min_rect.z,
-    grid.tool_min_rect.x, grid.tool_min_rect.y, grid.tool_max_rect.z,
+    grid.tool_min_rect.x* grid_size, grid.tool_min_rect.y* grid_size, grid.tool_min_rect.z* grid_size,
+    grid.tool_min_rect.x* grid_size, grid.tool_min_rect.y* grid_size, grid.tool_max_rect.z* grid_size,
 
-    grid.tool_max_rect.x, grid.tool_max_rect.y, grid.tool_max_rect.z,
-    grid.tool_max_rect.x, grid.tool_min_rect.y, grid.tool_max_rect.z,
+    grid.tool_max_rect.x* grid_size, grid.tool_max_rect.y* grid_size, grid.tool_max_rect.z* grid_size,
+    grid.tool_max_rect.x* grid_size, grid.tool_min_rect.y* grid_size, grid.tool_max_rect.z* grid_size,
 
-    grid.tool_max_rect.x, grid.tool_max_rect.y, grid.tool_max_rect.z,
-    grid.tool_max_rect.x, grid.tool_max_rect.y, grid.tool_min_rect.z,
+    grid.tool_max_rect.x* grid_size, grid.tool_max_rect.y* grid_size, grid.tool_max_rect.z* grid_size,
+    grid.tool_max_rect.x* grid_size, grid.tool_max_rect.y* grid_size, grid.tool_min_rect.z* grid_size,
 
-    grid.tool_max_rect.x, grid.tool_max_rect.y, grid.tool_max_rect.z,
-    grid.tool_min_rect.x, grid.tool_max_rect.y, grid.tool_max_rect.z,
+    grid.tool_max_rect.x* grid_size, grid.tool_max_rect.y* grid_size, grid.tool_max_rect.z* grid_size,
+    grid.tool_min_rect.x* grid_size, grid.tool_max_rect.y* grid_size, grid.tool_max_rect.z* grid_size,
 
-    grid.tool_min_rect.x, grid.tool_min_rect.y, grid.tool_max_rect.z,
-    grid.tool_min_rect.x, grid.tool_max_rect.y, grid.tool_max_rect.z,
+    grid.tool_min_rect.x* grid_size, grid.tool_min_rect.y* grid_size, grid.tool_max_rect.z* grid_size,
+    grid.tool_min_rect.x* grid_size, grid.tool_max_rect.y* grid_size, grid.tool_max_rect.z* grid_size,
 
-    grid.tool_min_rect.x, grid.tool_max_rect.y, grid.tool_min_rect.z,
-    grid.tool_min_rect.x, grid.tool_max_rect.y, grid.tool_max_rect.z,
+    grid.tool_min_rect.x* grid_size, grid.tool_max_rect.y* grid_size, grid.tool_min_rect.z* grid_size,
+    grid.tool_min_rect.x* grid_size, grid.tool_max_rect.y* grid_size, grid.tool_max_rect.z* grid_size,
 
-    grid.tool_max_rect.x, grid.tool_min_rect.y, grid.tool_min_rect.z,
-    grid.tool_max_rect.x, grid.tool_min_rect.y, grid.tool_max_rect.z,
+    grid.tool_max_rect.x* grid_size, grid.tool_min_rect.y* grid_size, grid.tool_min_rect.z* grid_size,
+    grid.tool_max_rect.x* grid_size, grid.tool_min_rect.y* grid_size, grid.tool_max_rect.z* grid_size,
 
-    grid.tool_min_rect.x, grid.tool_min_rect.y, grid.tool_max_rect.z,
-    grid.tool_max_rect.x, grid.tool_min_rect.y, grid.tool_max_rect.z,
+    grid.tool_min_rect.x* grid_size, grid.tool_min_rect.y* grid_size, grid.tool_max_rect.z* grid_size,
+    grid.tool_max_rect.x* grid_size, grid.tool_min_rect.y* grid_size, grid.tool_max_rect.z* grid_size,
 
-    grid.tool_min_rect.x, grid.tool_max_rect.y, grid.tool_min_rect.z,
-    grid.tool_max_rect.x, grid.tool_max_rect.y, grid.tool_min_rect.z,
+    grid.tool_min_rect.x* grid_size, grid.tool_max_rect.y* grid_size, grid.tool_min_rect.z* grid_size,
+    grid.tool_max_rect.x* grid_size, grid.tool_max_rect.y* grid_size, grid.tool_min_rect.z* grid_size,
 
-    grid.tool_max_rect.x, grid.tool_min_rect.y, grid.tool_min_rect.z,
-    grid.tool_max_rect.x, grid.tool_max_rect.y, grid.tool_min_rect.z,
+    grid.tool_max_rect.x* grid_size, grid.tool_min_rect.y* grid_size, grid.tool_min_rect.z* grid_size,
+    grid.tool_max_rect.x* grid_size, grid.tool_max_rect.y* grid_size, grid.tool_min_rect.z* grid_size,
     };
 
     glUseProgram(renderingProgram_rect);
@@ -462,6 +463,16 @@ int main(void) {
     while (!glfwWindowShouldClose(window)) {
 
 
+            float grid_size = get_grid_size();
+
+            glUseProgram(renderingProgram);
+
+            GLuint grid_loc = glGetUniformLocation(renderingProgram, "grid_size");
+
+            glUniform1f(grid_loc, grid_size);
+
+         
+
             data.x_t = get_coord_tool().x;
             data.y_t = get_coord_tool().y;
             data.z_t = get_coord_tool().z;
@@ -488,9 +499,8 @@ int main(void) {
 
             float t_2 = (GLfloat)glfwGetTime();
             // Булева операция
-            //grid.set_draw();
-            // 
-            //grid.Boolean_op();
+
+            grid.Boolean_op();
             grid.grid_dexel_draw_dyn();
 
             float t_3 = (GLfloat)glfwGetTime();

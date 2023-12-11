@@ -8,6 +8,8 @@ layout (location = 2) in int voxel_id;
 uniform mat4 v_matrix;
 uniform mat4 proj_matrix;
 
+uniform float grid_size;
+
 
 out vec4 varyingColor;  // be interpolated by the rasterizer
 
@@ -26,7 +28,7 @@ void main(void)
 
     //gl_PointSize = 1.0;
 
-    int size = 1;
+    float size = 1/grid_size;
 
     mat4 mv_matrix = v_matrix;  
 

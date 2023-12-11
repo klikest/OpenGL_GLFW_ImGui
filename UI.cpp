@@ -10,14 +10,20 @@
 
 bool G_code_u = false;
 
-int r_tool = 1;
-int h_tool = 1;
+int d_tool = 100;
+int h_tool = 10;
 
-int r_blank = 30;
-int h_blank = 60;
+int d_blank = 16;
+int h_blank = 70;
 
-int x_t=-0, y_t=0, z_t=0, a_x_t=0, a_y_t=0, a_z_t=0;
+int x_t=30, y_t=-90, z_t=0, a_x_t=0, a_y_t=0, a_z_t=0;
 
+float grid_size = 0.5;
+
+float get_grid_size()
+{
+	return grid_size;
+}
 
 void InitUI(GLFWwindow* window)
 {
@@ -57,7 +63,9 @@ bool get_G_code_bool()
 
 glm::vec3 get_coord_tool()
 {
-	return glm::vec3(x_t, y_t, z_t);
+	float size = 1 / grid_size;
+
+	return glm::vec3(x_t*size, y_t * size, z_t * size);
 }
 
 glm::vec3 get_angle_tool()
@@ -67,7 +75,8 @@ glm::vec3 get_angle_tool()
 
 glm::vec4 get_tool_and_blank()
 {
-	return glm::vec4(r_tool, h_tool, r_blank, h_blank);
+	float size = 1 / grid_size;
+	return glm::vec4((d_tool/2)*size, h_tool*size, (d_blank/2)*size, h_blank*size);
 }
 
 void RenderUI(GLFWwindow* window, UI_Data data)
@@ -106,12 +115,11 @@ void RenderUI(GLFWwindow* window, UI_Data data)
 
 	ImGui::Begin("Info");
 	ImGui::Text(FPS_s.c_str());
-	//ImGui::Text(t_x.c_str());
-	//ImGui::Text(t_y.c_str());
-	//ImGui::Text(t_z.c_str());
-	ImGui::SliderInt("R tool", &r_tool, 1, 100);
+
+	ImGui::SliderFloat("Grid size", &grid_size, 0.1, 1);
+	ImGui::SliderInt("D tool", &d_tool, 1, 200);
 	ImGui::SliderInt("H tool", &h_tool, 1, 100);
-	ImGui::SliderInt("R blank", &r_blank, 1.0f, 100.0f);
+	ImGui::SliderInt("D blank", &d_blank, 1.0f, 100.0f);
 	ImGui::SliderInt("H blank", &h_blank, 1.0f, 500.0f);
 	ImGui::SliderInt("X", &x_t, -200.0f, 200.0f);
 	ImGui::SliderInt("Y", &y_t, -200.0f, 200.0f);
