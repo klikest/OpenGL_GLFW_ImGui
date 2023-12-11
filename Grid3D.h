@@ -62,6 +62,9 @@ public:
 	void get_intersection_size();
 	void Boolean_op();
 
+
+	glm::vec3 transform(glm::vec3 coord);
+	glm::vec3 inv_transform(glm::vec3 coord);
 	void get_tool_bbox();
 	void create_blank_dexel_dyn(float r, float h);
 	void create_blank_dexel(float r, float h);
