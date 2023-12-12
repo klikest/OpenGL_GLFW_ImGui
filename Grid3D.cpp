@@ -333,17 +333,55 @@ void Grid3D::Boolean_op()
             if (d_tool_pointer[iter_tool_mass[i]].y != 0 && d_layers_blank_pointer[iter_blank_mass[i]][l_num_of_dexel].y != 0 )
             {
 
-                int curr_tool_min = tool_min_rect.z + d_tool_pointer[iter_tool_mass[i]].x;
-                int curr_tool_max = tool_max_rect.z + d_tool_pointer[iter_tool_mass[i]].x + d_tool_pointer[iter_tool_mass[i]].y;
+                int curr_tool_min = d_tool_pointer[iter_tool_mass[i]].x;
+                int curr_tool_max = d_tool_pointer[iter_tool_mass[i]].x + d_tool_pointer[iter_tool_mass[i]].y;
 
                 int curr_blank_min = d_layers_blank_pointer[iter_blank_mass[i]][l_num_of_dexel].x;
                 int curr_blank_max = d_layers_blank_pointer[iter_blank_mass[i]][l_num_of_dexel].x + d_layers_blank_pointer[iter_blank_mass[i]][l_num_of_dexel].y;
 
 
+                //            -------         tool
+                //         -------------      blank
+                if (curr_tool_min > curr_blank_min && curr_tool_max < curr_blank_max)
+                {
+                    int num_of_dexel_layers_in_curret_dexel = num_of_dexels_pointer[iter_blank_mass[i]];
+
+
+                    time_dexel_data = new glm::vec2[num_of_dexel_layers_in_curret_dexel];
+
+                    for (int n = 0; n < num_of_dexel_layers_in_curret_dexel; n++)
+                    {
+                        time_dexel_data[n] = d_layers_blank_pointer[iter_blank_mass[i]][n];
+                    }
+
+                    //time_dexel_data = d_layers_blank_pointer[iter_blank_mass[i]];
+
+                    delete[] d_layers_blank_pointer[iter_blank_mass[i]];
+                    d_layers_blank_pointer[iter_blank_mass[i]] = nullptr;
+
+                    d_layers_blank_pointer[iter_blank_mass[i]] = new glm::vec2[num_of_dexel_layers_in_curret_dexel + 1];
+
+
+                    for (int n = 0; n < num_of_dexel_layers_in_curret_dexel; n++)
+                    {
+                        d_layers_blank_pointer[iter_blank_mass[i]][n] = time_dexel_data[n];
+                    }
+
+                    delete[] time_dexel_data;
+                    time_dexel_data = nullptr;
+
+                    num_of_dexels_pointer[iter_blank_mass[i]] += 1;
+
+                    d_layers_blank_pointer[iter_blank_mass[i]][l_num_of_dexel] = glm::vec2(curr_blank_min, curr_tool_min - curr_blank_min);
+                    d_layers_blank_pointer[iter_blank_mass[i]][num_of_dexels_pointer[iter_blank_mass[i]] - 1] = glm::vec2(curr_tool_max, curr_blank_max - curr_tool_max);
+
+                    
+                }
+
 
                 //   -------------           tool
                 //         ---------------   blank
-                if (curr_tool_min < curr_tool_min && curr_tool_max > curr_blank_min && curr_tool_max < curr_blank_max)
+                else if (curr_tool_min < curr_blank_min && curr_tool_max > curr_blank_min && curr_tool_max < curr_blank_max)
                 {
                     d_layers_blank_pointer[iter_blank_mass[i]][l_num_of_dexel] = glm::vec2(curr_tool_max, curr_blank_max - curr_tool_max);
                 }
@@ -355,25 +393,25 @@ void Grid3D::Boolean_op()
                     d_layers_blank_pointer[iter_blank_mass[i]][l_num_of_dexel] = glm::vec2(curr_blank_min, curr_tool_min - curr_blank_min);
                 }
 
-                //if (tool_min_rect.z + d_tool_pointer[iter_tool_mass[i]].x <= 0)
-                //{
-                    //d_layers_blank_pointer[iter_blank_mass[i]][l_num_of_dexel].y = 0;
-                //}
-                //else
-                //{
-                //    d_layers_blank_pointer[iter_blank_mass[i]][l_num_of_dexel].y = tool_min_rect.z + d_tool_pointer[iter_tool_mass[i]].x;
-                //}
+                //         -------------      tool
+                //         -------------      blank
+                else if (curr_tool_min == curr_blank_min && curr_tool_max == curr_blank_max)
+                {
+                    d_layers_blank_pointer[iter_blank_mass[i]][l_num_of_dexel] = glm::vec2(0, 0);
+                }
+
+                //         -------------      tool
+                //           ---------        blank
+                else if (curr_tool_min < curr_blank_min && curr_tool_max > curr_blank_max)
+                {
+                    d_layers_blank_pointer[iter_blank_mass[i]][l_num_of_dexel] = glm::vec2(0, 0);
+                }
+
             }
         }
 
     }
 
-
-    //std::cout << iter_tool_mass[0] << std::endl;
-
-    //std::cout << "X0 = " << x_inters_d.x << " X1 = " << x_inters_d.y << std::endl;
-    //std::cout << "Y0 = " << y_inters_d.x << " Y1 = " << y_inters_d.y << std::endl;
-    //std::cout << " " << std::endl;
  }
 
 
@@ -558,7 +596,7 @@ void Grid3D::grid_dexel_draw_dyn()
 
         }
         */
-        for (int num = 0; num < sizeof(d_layers_blank_pointer[j]) / sizeof(glm::vec2); num++)
+        for (int num = 0; num < num_of_dexels_pointer[j]; num++)
         {
             if (d_layers_blank_pointer[j][num].y != 0)
             {

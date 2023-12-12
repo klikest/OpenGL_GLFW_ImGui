@@ -25,6 +25,7 @@ public:
 	glm::vec2* d_tool_pointer;
 	glm::vec2** d_layers_blank_pointer;
 	bool** d_layers_tool_pointer;
+	glm::vec2* time_dexel_data;
 
 	std::vector < glm::vec4> tool_dexel_cloud;
 	std::vector < glm::vec2> tool_dexel_grid;
