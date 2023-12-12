@@ -21,6 +21,7 @@ public:
 	std::vector<std::vector<glm::vec2>> dexel_blank;
 	
 	glm::vec2* d_blank_pointer;
+	int* num_of_dexels_pointer;
 	glm::vec2* d_tool_pointer;
 	glm::vec2** d_layers_blank_pointer;
 	bool** d_layers_tool_pointer;

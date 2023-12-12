@@ -18,7 +18,7 @@ int h_blank = 70;
 
 int x_t=30, y_t=-90, z_t=0, a_x_t=0, a_y_t=0, a_z_t=0;
 
-float grid_size = 0.5;
+float grid_size = 1;
 
 float get_grid_size()
 {

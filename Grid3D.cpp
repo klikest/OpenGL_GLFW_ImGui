@@ -94,6 +94,9 @@ void Grid3D::create_blank_dexel_dyn(float r, float h)
 
             delete[] d_layers_blank_pointer;
             d_layers_blank_pointer = nullptr;
+
+            delete[] num_of_dexels_pointer;
+            num_of_dexels_pointer = nullptr;
         }
 
 
@@ -108,6 +111,7 @@ void Grid3D::create_blank_dexel_dyn(float r, float h)
 
         d_layers_blank_pointer = new glm::vec2*[X_blank_size * Y_blank_size];
 
+        num_of_dexels_pointer = new int[X_blank_size * Y_blank_size];
 
         Z_blank_size = h;
 
@@ -129,6 +133,7 @@ void Grid3D::create_blank_dexel_dyn(float r, float h)
             [this, r, h](int i)
             {
                 d_layers_blank_pointer[i] = new glm::vec2[1];
+                num_of_dexels_pointer[i] = 1;
 
                 if (Scalar_cyl(r, i % X_blank_size - X_blank_size / 2, (i / X_blank_size) % Y_blank_size - Y_blank_size / 2))
                 {
@@ -323,18 +328,41 @@ void Grid3D::Boolean_op()
     for (int i = 0; i < iter_blank_mass.size(); i++)
     {
 
-        for (int l_num_of_dexel = 0; l_num_of_dexel < sizeof(d_layers_blank_pointer[iter_blank_mass[i]])/sizeof(glm::vec2); l_num_of_dexel++)
+        for (int l_num_of_dexel = 0; l_num_of_dexel < num_of_dexels_pointer[iter_blank_mass[i]]; l_num_of_dexel++)
         {
-            if (d_tool_pointer[iter_tool_mass[i]].y != 0 && d_layers_blank_pointer[iter_blank_mass[i]][l_num_of_dexel].y != 0 && d_layers_blank_pointer[iter_blank_mass[i]][l_num_of_dexel].y > tool_min_rect.z + d_tool_pointer[iter_tool_mass[i]].x)
+            if (d_tool_pointer[iter_tool_mass[i]].y != 0 && d_layers_blank_pointer[iter_blank_mass[i]][l_num_of_dexel].y != 0 )
             {
-                if (tool_min_rect.z + d_tool_pointer[iter_tool_mass[i]].x <= 0)
+
+                int curr_tool_min = tool_min_rect.z + d_tool_pointer[iter_tool_mass[i]].x;
+                int curr_tool_max = tool_max_rect.z + d_tool_pointer[iter_tool_mass[i]].x + d_tool_pointer[iter_tool_mass[i]].y;
+
+                int curr_blank_min = d_layers_blank_pointer[iter_blank_mass[i]][l_num_of_dexel].x;
+                int curr_blank_max = d_layers_blank_pointer[iter_blank_mass[i]][l_num_of_dexel].x + d_layers_blank_pointer[iter_blank_mass[i]][l_num_of_dexel].y;
+
+
+
+                //   -------------           tool
+                //         ---------------   blank
+                if (curr_tool_min < curr_tool_min && curr_tool_max > curr_blank_min && curr_tool_max < curr_blank_max)
                 {
-                    d_layers_blank_pointer[iter_blank_mass[i]][l_num_of_dexel].y = 0;
+                    d_layers_blank_pointer[iter_blank_mass[i]][l_num_of_dexel] = glm::vec2(curr_tool_max, curr_blank_max - curr_tool_max);
                 }
-                else
+
+                //         -------------      tool
+                //   ---------------          blank
+                else if (curr_tool_min > curr_blank_min && curr_tool_min < curr_blank_max && curr_tool_max > curr_blank_max)
                 {
-                    d_layers_blank_pointer[iter_blank_mass[i]][l_num_of_dexel].y = tool_min_rect.z + d_tool_pointer[iter_tool_mass[i]].x;
+                    d_layers_blank_pointer[iter_blank_mass[i]][l_num_of_dexel] = glm::vec2(curr_blank_min, curr_tool_min - curr_blank_min);
                 }
+
+                //if (tool_min_rect.z + d_tool_pointer[iter_tool_mass[i]].x <= 0)
+                //{
+                    //d_layers_blank_pointer[iter_blank_mass[i]][l_num_of_dexel].y = 0;
+                //}
+                //else
+                //{
+                //    d_layers_blank_pointer[iter_blank_mass[i]][l_num_of_dexel].y = tool_min_rect.z + d_tool_pointer[iter_tool_mass[i]].x;
+                //}
             }
         }
 
