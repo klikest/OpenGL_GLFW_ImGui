@@ -9,7 +9,9 @@ uniform mat4 v_matrix;
 uniform mat4 proj_matrix;
 
 uniform float grid_size;
+uniform float num_blank_dexels;
 
+uniform vec3 lightPos;
 
 out vec4 varyingColor;  // be interpolated by the rasterizer
 
@@ -22,18 +24,90 @@ vec3 hash31(float p)
 }
 
 
+vec3 lightColor;
+vec3 objectColor;
+vec3 lightDir;
+vec4 pos;
+vec3 pos_for_light;
+vec3 normal;
+
+
+
 
 void main(void) 
 {
 
-    //gl_PointSize = 1.0;
+
+    if (gl_InstanceID > num_blank_dexels)
+    {
+        objectColor = vec3(0.6, 0.6, 0.3);
+    }
+    else
+    {
+        objectColor = vec3(0.8, 0.8, 0.8);
+    }
+
 
     float size = 1/grid_size;
+    mat4 mv_matrix = v_matrix; 
+    vec4 pos = vec4(proj_matrix * mv_matrix * vec4(vec3((position.x + aOffset.x - 0.5)/size, (position.y + aOffset.y - 0.5)/size, (position.z*aOffset.w + aOffset.z)/size), 1.0));
 
-    mat4 mv_matrix = v_matrix;  
+    vec3 pos_for_light = vec3(aOffset.x/size, aOffset.y/size, aOffset.z/size);
 
-    gl_Position = vec4(proj_matrix * mv_matrix * vec4(vec3((position.x + aOffset.x - 0.5)/size, (position.y + aOffset.y - 0.5)/size, (position.z*aOffset.w + aOffset.z)/size), 1.0));  // right-to-left
-    varyingColor = vec4(position, 1.0) * 0.5 + vec4(0.5, 0.5, 0.5, 0.5);
+
+
+
+    vec3 normal = vec3(0.0, 0.0, 0.0);
+    vec3 lightDir = normalize(lightPos - pos_for_light);
+
+
+
+
+
+    if (gl_VertexID < 6)
+    {
+        normal = vec3(0.0, 0.0, -1.0);
+    }
+
+    else if (gl_VertexID >= 6 && gl_VertexID < 12)
+    {
+        normal = vec3(1.0, 0.0, 0.0);
+    }
+
+    else if (gl_VertexID >= 12 && gl_VertexID < 18)
+    {
+        normal = vec3(0.0, 0.0, 1.0);
+    }
+
+    else if (gl_VertexID >= 18 && gl_VertexID < 24)
+    {
+        normal = vec3(-1.0, 0.0, 0.0);
+    }
+
+    else if (gl_VertexID >= 24 && gl_VertexID < 30)
+    {
+        normal = vec3(0.0, -1.0, 0.0);
+    }
+
+        else if (gl_VertexID >= 30 && gl_VertexID < 36)
+    {
+        normal = vec3(0.0, 1.0, 0.0);
+    }
+
+
+
+    lightColor = vec3(1.0, 1.0, 1.0);
+    float diff = max(dot(normalize(normal), normalize(lightDir)), 0.0);
+    vec3 diffuse = diff * lightColor;
+
+
+    vec3 result = diffuse * objectColor + vec3(0.2, 0.2, 0.2);
+    varyingColor = vec4(result, 1.0f);
+
+ 
+
+    gl_Position = pos;  // right-to-left
+    //varyingColor = vec4(position, 1.0) * 0.5 + vec4(0.5, 0.5, 0.5, 0.5);
 }
 
 

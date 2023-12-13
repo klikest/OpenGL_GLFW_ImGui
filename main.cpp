@@ -414,7 +414,8 @@ void display(GLFWwindow* window, double currentTime, Grid3D grid) {
     glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 24*3, rect_lines, GL_DYNAMIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
-    glDrawArrays(GL_LINES, 0, 24);
+    //glDrawArrays(GL_LINES, 0, 24);
+
 
 }
 
@@ -463,15 +464,13 @@ int main(void) {
     while (!glfwWindowShouldClose(window)) {
 
 
+            GLint lightPosLoc = glGetUniformLocation(renderingProgram, "lightPos");
+            glUniform3f(lightPosLoc, camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z);
+
             float grid_size = get_grid_size();
-
             glUseProgram(renderingProgram);
-
             GLuint grid_loc = glGetUniformLocation(renderingProgram, "grid_size");
-
             glUniform1f(grid_loc, grid_size);
-
-         
 
             data.x_t = get_coord_tool().x;
             data.y_t = get_coord_tool().y;
@@ -500,11 +499,14 @@ int main(void) {
             float t_2 = (GLfloat)glfwGetTime();
             // Булева операция
 
+
             grid.Boolean_op();
             grid.grid_dexel_draw_dyn();
 
             float t_3 = (GLfloat)glfwGetTime();
             // Камера + рендер
+
+
 
             data.camPos = camera.cameraPos;
             data.cam_speed = camera.cam_speed;
@@ -515,6 +517,9 @@ int main(void) {
             deltaTime = currentFrame - lastFrame;
             lastFrame = currentFrame;
             data.delta_time = deltaTime;
+
+
+
 
             display(window, glfwGetTime(), grid);
 
@@ -529,7 +534,12 @@ int main(void) {
             data.t2 = add_data_to_plot(data.t2, (t_3 - t_2));
             data.t3 = add_data_to_plot(data.t3, (t_0 - t_3));
         
-        
+
+            glUseProgram(renderingProgram);
+            GLuint blank_num_loc = glGetUniformLocation(renderingProgram, "num_blank_dexels");
+            glUniform1f(blank_num_loc, grid.num_blank_dexels);
+      
+
     }
 
 

@@ -204,7 +204,7 @@ void Grid3D::get_intersection_size()
 
     else
     {
-        std::cout << "Error compute bbox boolean cut X" << std::endl;
+        //std::cout << "Error compute bbox boolean cut X" << std::endl;
     }
 
 
@@ -260,7 +260,7 @@ void Grid3D::get_intersection_size()
 
     else
     {
-        std::cout << "Error compute bbox boolean cut Y" << std::endl;
+        //std::cout << "Error compute bbox boolean cut Y" << std::endl;
     }
 
 
@@ -571,6 +571,8 @@ void Grid3D::create_tool_dexel_dyn(float r, float h, float dx, float dy, float d
 void Grid3D::grid_dexel_draw_dyn()
 {
     grid_draw.clear();
+
+    num_blank_dexels = 0;
     
     for (int j = 0; j < X_blank_size * Y_blank_size; j++)
     {   /*
@@ -601,6 +603,7 @@ void Grid3D::grid_dexel_draw_dyn()
             if (d_layers_blank_pointer[j][num].y != 0)
             {
                 grid_draw.push_back(glm::vec4(j % X_blank_size - X_blank_size / 2, (j / X_blank_size) % Y_blank_size - Y_blank_size / 2, d_layers_blank_pointer[j][num].x, d_layers_blank_pointer[j][num].y));
+                num_blank_dexels += 1;
             }
         }
     }
@@ -612,12 +615,6 @@ void Grid3D::grid_dexel_draw_dyn()
         {
             grid_draw.push_back(glm::vec4(j % X_tool_size + tool_min_rect.x,       (j / X_tool_size) % Y_tool_size + tool_min_rect.y,   d_tool_pointer[j].x,   d_tool_pointer[j].y));
         }
-    }
-
-
-    for (int i = 0; i < tool_grid.size(); i++)
-    {
-        grid_draw.push_back(glm::vec4(tool_grid[i], 1));
     }
 
 }
