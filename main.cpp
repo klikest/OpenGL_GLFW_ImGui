@@ -1,9 +1,9 @@
-
 #include <string>
 #include <vector>
 #include <iostream>
 #include <fstream>
 #include <cmath>
+#include <cstdlib>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -456,21 +456,13 @@ int main(void) {
 
     Grid3D grid;
     
-
-    //grid.create_blank_dexel_dyn(data.r_b, data.h_b);
-    //grid.create_tool_dexel_dyn(data.r_t, data.h_t, data.x_t, data.y_t, data.z_t, 0, 0, 0);
-
-    //grid.grid_dexel_draw_dyn();
-    while (!glfwWindowShouldClose(window)) {
+    GLuint blank_num_loc = glGetUniformLocation(renderingProgram, "num_blank_dexels");
+    GLint lightPosLoc = glGetUniformLocation(renderingProgram, "lightPos");
+    GLuint grid_loc = glGetUniformLocation(renderingProgram, "grid_size");
 
 
-            GLint lightPosLoc = glGetUniformLocation(renderingProgram, "lightPos");
-            glUniform3f(lightPosLoc, camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z);
-
-            float grid_size = get_grid_size();
-            glUseProgram(renderingProgram);
-            GLuint grid_loc = glGetUniformLocation(renderingProgram, "grid_size");
-            glUniform1f(grid_loc, grid_size);
+    while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
+        glfwWindowShouldClose(window) == 0) {
 
             data.x_t = get_coord_tool().x;
             data.y_t = get_coord_tool().y;
@@ -503,6 +495,14 @@ int main(void) {
             grid.Boolean_op();
             grid.grid_dexel_draw_dyn();
 
+
+            glUseProgram(renderingProgram);
+            glUniform3f(lightPosLoc, camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z);
+            float grid_size = get_grid_size();
+            glUniform1f(grid_loc, grid_size);
+            glUniform1f(blank_num_loc, grid.num_blank_dexels - 1);
+
+
             float t_3 = (GLfloat)glfwGetTime();
             // Камера + рендер
 
@@ -534,18 +534,16 @@ int main(void) {
             data.t2 = add_data_to_plot(data.t2, (t_3 - t_2));
             data.t3 = add_data_to_plot(data.t3, (t_0 - t_3));
         
-
-            glUseProgram(renderingProgram);
-            GLuint blank_num_loc = glGetUniformLocation(renderingProgram, "num_blank_dexels");
-            glUniform1f(blank_num_loc, grid.num_blank_dexels);
       
 
     }
 
 
+
     ImGui::DestroyContext();
     ImPlot::DestroyContext();
-    glfwDestroyWindow(window);
-    glfwTerminate();
+    //glfwDestroyWindow(window);
+    //glfwTerminate();
     exit(EXIT_SUCCESS);
+    exit(0);
 }

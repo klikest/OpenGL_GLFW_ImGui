@@ -40,7 +40,7 @@ void main(void)
 
     if (gl_InstanceID > num_blank_dexels)
     {
-        objectColor = vec3(0.6, 0.6, 0.3);
+        objectColor = vec3(0.75, 0.75, 0.3);
     }
     else
     {
@@ -101,7 +101,7 @@ void main(void)
     vec3 diffuse = diff * lightColor;
 
 
-    vec3 result = diffuse * objectColor + vec3(0.2, 0.2, 0.2);
+    vec3 result = diffuse * objectColor + vec3(0.1, 0.1, 0.1);
     varyingColor = vec4(result, 1.0f);
 
  

@@ -37,19 +37,18 @@ bool Scalar_cyl_tool(float r, float x, float y)
 glm::vec3 Grid3D::transform(glm::vec3 coord)
 {
     glm::mat4 trans_y = glm::mat4(1.0f);
-    glm::mat4 trans_x = glm::mat4(1.0f);
-
-    glm::vec3 pos_offcenter = coord - glm::vec3(0, 0, offcenter);   // Смещение на OffCenter для поворота по оси А
-
     trans_y = glm::rotate(trans_y, glm::radians(tool_ax), glm::vec3(0.0f, 1.0f, 0.0f)); // Матрица поворота вокруг оси А
 
-    glm::vec4 coords_rot_offcenter = trans_y * glm::vec4(pos_offcenter.x, pos_offcenter.y, pos_offcenter.z, 1.0f); // Поворот вокруг оси А
+    glm::mat4 trans_x = glm::mat4(1.0f);
+    trans_x = glm::rotate(trans_x, glm::radians(tool_az), glm::vec3(0.0f, 0.0f, 1.0f)); // Матрица поворота вокруг оси X
+
+    glm::vec4 pos_offcenter = glm::vec4(coord, 1) - glm::vec4(0, 0, offcenter, 0);   // Смещение на OffCenter для поворота по оси А
+
+    glm::vec4 coords_rot_offcenter = trans_y * pos_offcenter; // Поворот вокруг оси А
 
     glm::vec4 point_after_rot_and_move = coords_rot_offcenter + glm::vec4(0, 0, offcenter, 0); // Обратное смещение на OffCenter после поворота по оси А
 
     glm::vec4 point_after_move = point_after_rot_and_move + glm::vec4(tool_dy, tool_dz, tool_dx, 1);
-
-    trans_x = glm::rotate(trans_x, glm::radians(tool_az), glm::vec3(0.0f, 0.0f, 1.0f)); // Матрица поворота вокруг оси X
 
     glm::vec4 end_points = trans_x * point_after_move;
 
@@ -398,6 +397,7 @@ void Grid3D::Boolean_op()
                 else if (curr_tool_min == curr_blank_min && curr_tool_max == curr_blank_max)
                 {
                     d_layers_blank_pointer[iter_blank_mass[i]][l_num_of_dexel] = glm::vec2(0, 0);
+                    
                 }
 
                 //         -------------      tool
@@ -405,6 +405,7 @@ void Grid3D::Boolean_op()
                 else if (curr_tool_min < curr_blank_min && curr_tool_max > curr_blank_max)
                 {
                     d_layers_blank_pointer[iter_blank_mass[i]][l_num_of_dexel] = glm::vec2(0, 0);
+                    
                 }
 
             }
