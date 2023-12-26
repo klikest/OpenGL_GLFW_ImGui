@@ -496,11 +496,23 @@ int main(void) {
             grid.grid_dexel_draw_dyn();
 
 
+
+            glm::mat4 rot_mat_x = glm::mat4(1.0f);
+            rot_mat_x = glm::rotate(rot_mat_x, glm::radians(-grid.tool_az), glm::vec3(0.0f, 0.0f, 1.0f));
+
+
+
+
             glUseProgram(renderingProgram);
             glUniform3f(lightPosLoc, camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z);
             float grid_size = get_grid_size();
             glUniform1f(grid_loc, grid_size);
             glUniform1f(blank_num_loc, grid.num_blank_dexels - 1);
+
+
+            GLuint rot_mat_Loc = glGetUniformLocation(renderingProgram, "rot_matrix");
+
+            glUniformMatrix4fv(rot_mat_Loc, 1, GL_FALSE, glm::value_ptr(rot_mat_x));
 
 
             float t_3 = (GLfloat)glfwGetTime();
@@ -512,6 +524,8 @@ int main(void) {
             data.cam_speed = camera.cam_speed;
             data.cam_pitch = camera.pitch;
             data.cam_yaw = camera.yaw;
+            data.num_vert_b = grid.num_blank_dexels;
+            data.num_vert_t = grid.num_tool_dexels;
 
             GLfloat currentFrame = (GLfloat)glfwGetTime();
             deltaTime = currentFrame - lastFrame;

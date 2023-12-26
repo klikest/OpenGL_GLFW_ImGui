@@ -7,6 +7,7 @@ layout (location = 2) in int voxel_id;
 
 uniform mat4 v_matrix;
 uniform mat4 proj_matrix;
+uniform mat4 rot_matrix;
 
 uniform float grid_size;
 uniform float num_blank_dexels;
@@ -50,7 +51,8 @@ void main(void)
 
     float size = 1/grid_size;
     mat4 mv_matrix = v_matrix; 
-    vec4 pos = vec4(proj_matrix * mv_matrix * vec4(vec3((position.x + aOffset.x - 0.5)/size, (position.y + aOffset.y - 0.5)/size, (position.z*aOffset.w + aOffset.z)/size), 1.0));
+
+    vec4 pos = vec4(proj_matrix * mv_matrix * rot_matrix * vec4(vec3((position.x + aOffset.x - 0.5)/size, (position.y + aOffset.y - 0.5)/size, (position.z*aOffset.w + aOffset.z)/size), 1.0));
 
     vec3 pos_for_light = vec3(aOffset.x/size, aOffset.y/size, aOffset.z/size);
 
@@ -96,13 +98,18 @@ void main(void)
 
 
 
+    vec4 new_light_dir = vec4(lightDir, 1.0f) * rot_matrix;
+
+    lightDir = vec3(new_light_dir.x, new_light_dir.y, new_light_dir.z);
+
+
     lightColor = vec3(1.0, 1.0, 1.0);
     float diff = max(dot(normalize(normal), normalize(lightDir)), 0.0);
     vec3 diffuse = diff * lightColor;
 
 
     vec3 result = diffuse * objectColor + vec3(0.1, 0.1, 0.1);
-    varyingColor = vec4(result, 1.0f);
+    varyingColor = vec4(result, 1.0f) ;
 
  
 

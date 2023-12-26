@@ -37,6 +37,7 @@ public:
 	glm::vec3 blank_max_rect;
 
 	float num_blank_dexels;
+	float num_tool_dexels;
 
 	glm::vec2 x_inters_d;
 	glm::vec2 y_inters_d;

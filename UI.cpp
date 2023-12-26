@@ -83,16 +83,13 @@ void RenderUI(GLFWwindow* window, UI_Data data)
 {
 	int FPS = (int)(1 / data.delta_time);
 	std::string FPS_s = "FPS =" + std::to_string(FPS);
-	//std::string t_x = "tool X =" + std::to_string(data.x_t);
-	//std::string t_y = "tool Y =" + std::to_string(data.y_t);
-	//std::string t_z = "tool Z =" + std::to_string(data.z_t);
 	std::string cam_x = "Cavera X =" + std::to_string(data.camPos.x);
 	std::string cam_y = "Cavera Y =" + std::to_string(data.camPos.y);
 	std::string cam_z = "Cavera Z =" + std::to_string(data.camPos.z);
 	std::string yaw = "Cavera Yaw =" + std::to_string(data.cam_yaw);
 	std::string pitch = "Cavera Pitch =" + std::to_string(data.cam_pitch);
-	std::string num_t = "Num tool voxels =" + std::to_string(data.num_vert_t);
-	std::string num_b = "Num blank voxels =" + std::to_string(data.num_vert_b);
+	std::string num_t = "Num tool dexels =" + std::to_string(data.num_vert_t);
+	std::string num_b = "Num blank dexels =" + std::to_string(data.num_vert_b);
 	std::string r = u8"Радиус инструмента =" + std::to_string(round(data.r_t));
 	//std::string h = u8"Высота заготовки =" + std::to_string(data.h);
 
@@ -117,19 +114,22 @@ void RenderUI(GLFWwindow* window, UI_Data data)
 	ImGui::Text(FPS_s.c_str());
 
 	ImGui::SliderFloat("Grid size", &grid_size, 0.1, 1);
-	ImGui::SliderInt("D tool", &d_tool, 1, 200);
-	ImGui::SliderInt("H tool", &h_tool, 1, 100);
+	ImGui::Text("Blank");
 	ImGui::SliderInt("D blank", &d_blank, 1.0f, 100.0f);
 	ImGui::SliderInt("H blank", &h_blank, 1.0f, 500.0f);
+	ImGui::Text("Tool");
+	ImGui::SliderInt("D tool", &d_tool, 1, 200);
+	ImGui::SliderInt("H tool", &h_tool, 1, 100);
 	ImGui::SliderInt("X", &x_t, -200.0f, 200.0f);
 	ImGui::SliderInt("Y", &y_t, -200.0f, 200.0f);
 	ImGui::SliderInt("Z", &z_t, -200.0f, 200.0f);
 	ImGui::SliderInt("A", &a_x_t, -180.0f, 180.0f);
 	ImGui::SliderInt("B", &a_y_t, -180.0f, 180.0f);
 	ImGui::SliderInt("C", &a_z_t, -180.0f, 180.0f);
+	ImGui::Text("Calc info");
 	ImGui::Text(num_t.c_str());
 	ImGui::Text(num_b.c_str());
-	ImGui::Checkbox("123", &G_code_u);
+	//ImGui::Checkbox("123", &G_code_u);
 	ImGui::Text(r.c_str());
 	ImGui::Text(cam_x.c_str());
 	ImGui::Text(cam_y.c_str());
